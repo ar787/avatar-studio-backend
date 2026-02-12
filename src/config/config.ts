@@ -5,11 +5,13 @@ dotenv.config();
 type Config = {
   port: number;
   nodeEnv: string;
+  geminiApiKey: string;
 };
 
 const config: Config = {
   port: Number(process.env.PORT) || 3000,
   nodeEnv: process.env.NODE_ENV || 'development',
+  geminiApiKey: process.env.GEMINI_API_KEY ?? '',
 };
 
 export default config;

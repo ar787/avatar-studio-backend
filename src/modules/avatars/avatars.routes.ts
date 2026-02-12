@@ -4,5 +4,6 @@ import * as avatarController from './avatars.controller.ts';
 const router = Router();
 
 router.get('/', avatarController.getAllPublicAvatarsController);
+router.get('/generate', avatarController.generatedImagesController);
 
 export default router;
