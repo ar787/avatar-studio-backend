@@ -1,9 +1,9 @@
-import express, { type Request, type Response } from 'express';
+import express from 'express';
+
+import avatarRoutes from './modules/avatars/avatars.routes.ts';
 
 const app = express();
 
-app.get('/', (req: Request, res: Response) => {
-  res.send('Hello World with TypeScript and Express66!');
-});
+app.use('/api/avatars', avatarRoutes);
 
 export default app;
