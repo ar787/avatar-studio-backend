@@ -26,3 +26,7 @@ dist-ssr
 
 # Service account key
 serviceAccountKey.json
+
+#firebase
+seed-data
+seed.ts

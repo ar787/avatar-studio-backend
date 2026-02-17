@@ -7,6 +7,8 @@ type Config = {
   nodeEnv: string;
   geminiApiKey: string;
   firestoreEmulator: string;
+  firebaseProjectId: string;
+  firebaseStorageBucket: string;
 };
 
 const config: Config = {
@@ -14,6 +16,8 @@ const config: Config = {
   nodeEnv: process.env.NODE_ENV || 'development',
   geminiApiKey: process.env.GEMINI_API_KEY ?? '',
   firestoreEmulator: process.env.FIRESTORE_EMULATOR_HOST ?? '',
+  firebaseStorageBucket: process.env.FIREBASE_STORAGE_BUCKET ?? '',
+  firebaseProjectId: process.env.FIREBASE_PROJECT_ID ?? '',
 };
 
 export default config;
