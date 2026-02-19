@@ -1,30 +1,34 @@
-import { type Request, type Response } from 'express';
+import { type NextFunction, type Request, type Response } from 'express';
 import * as catalogService from './service/avatar-public.service.ts';
 import * as avatarGeneratorService from './service/avatar-generator.service.ts';
+import { BadRequestError } from '../../utils/errors/ApiErrors.ts';
+import { HttpStatusCode } from '../../utils/httpStatusCodes.ts';
 
 export const getAllPublicAvatarsController = async (
-  req: Request,
+  _: Request,
   res: Response,
+  next: NextFunction,
 ) => {
   try {
     const avatars = await catalogService.getAllPublicCatalog();
-    res.status(200).json({
+    res.status(HttpStatusCode.OK).json({
       success: true,
       data: avatars,
     });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 };
 
-export const downloadAvatar = async (req: Request, res: Response) => {
+export const downloadAvatar = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const filename = req.params.filename;
-
     if (!filename || typeof filename !== 'string') {
-      return res
-        .status(400)
-        .json({ success: false, message: 'ID is required' });
+      throw new BadRequestError('Filename is required');
     }
 
     const stream = await catalogService.getAvatarStream(filename);
@@ -34,28 +38,19 @@ export const downloadAvatar = async (req: Request, res: Response) => {
 
     stream.pipe(res);
   } catch (error: any) {
-    if (error.message === 'image not found') {
-      return res.status(404).json({
-        success: false,
-        message: 'The avatar file was not found in our storage.',
-      });
-    }
-
-    res.status(500).json({
-      success: false,
-      message: 'Something went wrong.',
-    });
+    next(error);
   }
 };
 
 export const generatedImagesController = async (
-  req: Request,
+  _: Request,
   res: Response,
+  next: NextFunction,
 ) => {
   try {
     const result = await avatarGeneratorService.generateImages();
-    res.status(200).json({ success: true, data: result });
+    res.status(HttpStatusCode.OK).json({ success: true, data: result });
   } catch (error: any) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 };
