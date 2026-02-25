@@ -1,6 +1,5 @@
 import { GoogleGenAI } from '@google/genai';
 
-import * as fs from 'node:fs';
 import config from '../../../config/config.ts';
 
 export const imagenAPI = async (prompt: string) => {
@@ -14,13 +13,9 @@ export const imagenAPI = async (prompt: string) => {
     },
   });
 
-  if (!response.generatedImages) return;
+  if (!response.generatedImages) return [];
 
-  let idx = 1;
-  for (const generatedImage of response.generatedImages) {
-    let imgBytes = generatedImage?.image?.imageBytes;
-    const buffer = Buffer.from(imgBytes, 'base64');
-    fs.writeFileSync(`imagen-${idx}.png`, buffer);
-    idx++;
-  }
+  return response.generatedImages.map((img) =>
+    Buffer.from(img.image?.imageBytes as string, 'base64'),
+  );
 };

@@ -43,12 +43,12 @@ export const downloadAvatar = async (
 };
 
 export const generatedImagesController = async (
-  _: Request,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const result = await avatarGeneratorService.generateImages();
+    const result = await avatarGeneratorService.generateImages(req.body.prompt);
     res.status(HttpStatusCode.OK).json({ success: true, data: result });
   } catch (error: any) {
     next(error);
