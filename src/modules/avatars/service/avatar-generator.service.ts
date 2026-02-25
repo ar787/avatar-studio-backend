@@ -1,23 +1,34 @@
-import { bucket } from '../../../config/firebase.ts';
+import { bucket, db } from '../../../config/firebase.ts';
 import { InternalServerError } from '../../../utils/errors/ApiErrors.ts';
 import { imagenAPI } from '../providers/imagen.provider.ts';
-
+import * as avatarRepo from '../avatars.repository.ts';
 export const generateImages = async (prompt: string) => {
   const imageBuffers = await imagenAPI(buildAvatarPrompt(prompt));
   if (imageBuffers.length === 0) {
     throw new InternalServerError('AI failed to generate images');
   }
 
-  const uploadPromises = imageBuffers.map((buffer, idx) => {
-    const filename = `generated-avatars/imagen-${Date.now()}-${idx}.png`;
+  const uploadPromises = imageBuffers.map(async (buffer, idx) => {
+    const name = `imagen-${Date.now()}-${idx}`;
+    const extension = 'png';
+    const filename = `generated-avatars/${name}.${extension}`;
     const file = bucket.file(filename);
 
-    return file.save(buffer, { contentType: 'image/png' });
+    await file.save(buffer, { contentType: 'image/png' });
+    await db.collection('generated-avatars').add({
+      imageUrl: file.publicUrl(),
+      name,
+      extension,
+    });
   });
 
   await Promise.all(uploadPromises);
 
   return { message: 'Images generated and stored successfully' };
+};
+
+export const getGeneratedAvatars = async () => {
+  return avatarRepo.fetchGeneratedAvatars();
 };
 
 function buildAvatarPrompt(userInput: string) {

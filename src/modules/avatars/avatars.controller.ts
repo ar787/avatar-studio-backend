@@ -20,6 +20,22 @@ export const getAllPublicAvatarsController = async (
   }
 };
 
+export const getGeneratedAvatarsController = async (
+  _: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const generatedAvatars = await avatarGeneratorService.getGeneratedAvatars();
+    res.status(HttpStatusCode.OK).json({
+      success: true,
+      data: generatedAvatars,
+    });
+  } catch (error: any) {
+    next(error);
+  }
+};
+
 export const downloadAvatar = async (
   req: Request,
   res: Response,

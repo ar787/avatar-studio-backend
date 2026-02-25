@@ -6,6 +6,11 @@ export const fetchPublicAvatarsRepo = async () => {
   return snapshot.docs.map((doc) => doc.data());
 };
 
+export const fetchGeneratedAvatars = async () => {
+  const snapshot = await db.collection('generated-avatars').get();
+  return snapshot.docs.map((doc) => doc.data());
+};
+
 export const getFileReference = (filePath: string): File => {
   const file = bucket.file(filePath);
   return file as unknown as File;

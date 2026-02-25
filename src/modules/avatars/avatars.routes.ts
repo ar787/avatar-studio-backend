@@ -5,5 +5,9 @@ const router = Router();
 
 router.get('/', avatarController.getAllPublicAvatarsController);
 router.get('/download/:filename', avatarController.downloadAvatar);
+router.get(
+  '/generated-avatars',
+  avatarController.getGeneratedAvatarsController,
+);
 router.post('/generate', avatarController.generatedImagesController);
 export default router;
