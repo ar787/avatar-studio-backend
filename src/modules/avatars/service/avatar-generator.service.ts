@@ -2,6 +2,7 @@ import { bucket, db } from '../../../config/firebase.ts';
 import { InternalServerError } from '../../../utils/errors/ApiErrors.ts';
 import { imagenAPI } from '../providers/imagen.provider.ts';
 import * as avatarRepo from '../avatars.repository.ts';
+
 export const generateImages = async (prompt: string) => {
   const imageBuffers = await imagenAPI(buildAvatarPrompt(prompt));
   if (imageBuffers.length === 0) {
@@ -13,6 +14,7 @@ export const generateImages = async (prompt: string) => {
     const extension = 'png';
     const filename = `generated-avatars/${name}.${extension}`;
     const file = bucket.file(filename);
+    const imageUrl = file.publicUrl();
 
     await file.save(buffer, { contentType: 'image/png' });
     await db.collection('generated-avatars').add({
@@ -20,11 +22,16 @@ export const generateImages = async (prompt: string) => {
       name,
       extension,
     });
+
+    return imageUrl;
   });
 
-  await Promise.all(uploadPromises);
+  const generatedUrls = await Promise.all(uploadPromises);
 
-  return { message: 'Images generated and stored successfully' };
+  return {
+    data: generatedUrls,
+    message: 'Images generated and stored successfully',
+  };
 };
 
 export const getGeneratedAvatars = async () => {
