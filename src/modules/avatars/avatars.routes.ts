@@ -6,10 +6,15 @@ const router = Router();
 
 router.get('/', avatarController.getAllPublicAvatarsController);
 router.get('/download/:filename', avatarController.downloadAvatar);
+// Deprecated
 router.get(
   '/generated-avatars',
   verifyAuthTokenHandler,
   avatarController.getGeneratedAvatarsController,
 );
-router.post('/generate', avatarController.generatedImagesController);
+router.post(
+  '/generate',
+  verifyAuthTokenHandler,
+  avatarController.generatedImagesController,
+);
 export default router;

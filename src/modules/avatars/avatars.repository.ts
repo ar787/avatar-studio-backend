@@ -1,14 +1,30 @@
 import { type File } from '@google-cloud/storage';
 import { db, bucket } from '../../config/firebase.ts';
+import { generatedImageConverter } from './converter.ts';
+import type { GeneratedImage } from './types.ts';
 
 export const fetchPublicAvatarsRepo = async () => {
   const snapshot = await db.collection('avatars').get();
   return snapshot.docs.map((doc) => doc.data());
 };
 
-export const fetchGeneratedAvatars = async () => {
-  const snapshot = await db.collection('generated-avatars').get();
-  return snapshot.docs.map((doc) => doc.data());
+export const fetchGeneratedAvatars = async (userId: string) => {
+  const snapshot = await db
+    .collection('users')
+    .doc(userId)
+    .collection('generated-images')
+    .withConverter(generatedImageConverter)
+    .get();
+  return snapshot.docs.map((doc) => {
+    const { storagePath, ...rest } = doc.data();
+    const storagePathArr = storagePath.split('/');
+    const name = storagePathArr[storagePathArr.length - 1];
+
+    return {
+      ...rest,
+      name,
+    };
+  });
 };
 
 export const getFileReference = (filePath: string): File => {
@@ -19,4 +35,18 @@ export const getFileReference = (filePath: string): File => {
 export const checkFileExists = async (filePath: string) => {
   const [exist] = await bucket.file(filePath).exists();
   return exist;
+};
+
+export const addImageToLibrary = async (
+  userId: string,
+  doc: GeneratedImage,
+) => {
+  const userImagesRef = db
+    .collection('users')
+    .doc(userId)
+    .collection('generated-images');
+
+  const docRef = await userImagesRef.add({ ...doc });
+
+  return docRef.id;
 };

@@ -1,7 +1,10 @@
 import { type NextFunction, type Request, type Response } from 'express';
 import * as catalogService from './service/avatar-public.service.ts';
 import * as avatarGeneratorService from './service/avatar-generator.service.ts';
-import { BadRequestError } from '../../utils/errors/ApiErrors.ts';
+import {
+  BadRequestError,
+  UnauthorizedError,
+} from '../../utils/errors/ApiErrors.ts';
 import { HttpStatusCode } from '../../utils/httpStatusCodes.ts';
 
 export const getAllPublicAvatarsController = async (
@@ -21,12 +24,18 @@ export const getAllPublicAvatarsController = async (
 };
 
 export const getGeneratedAvatarsController = async (
-  _: Request,
+  req: Request,
   res: Response,
   next: NextFunction,
 ) => {
   try {
-    const generatedAvatars = await avatarGeneratorService.getGeneratedAvatars();
+    const user = req.user;
+    if (!user) {
+      return next(new UnauthorizedError('User not authorized'));
+    }
+    const generatedAvatars = await avatarGeneratorService.getGeneratedAvatars(
+      user.uid,
+    );
     res.status(HttpStatusCode.OK).json({
       success: true,
       data: generatedAvatars,
@@ -64,7 +73,14 @@ export const generatedImagesController = async (
   next: NextFunction,
 ) => {
   try {
-    const result = await avatarGeneratorService.generateImages(req.body.prompt);
+    const user = req.user;
+    if (!user) {
+      return next(new UnauthorizedError('Unauthorized user'));
+    }
+    const result = await avatarGeneratorService.generateImages(
+      req.body.prompt,
+      user.uid,
+    );
     res.status(HttpStatusCode.OK).json({ success: true, data: result });
   } catch (error: any) {
     next(error);
