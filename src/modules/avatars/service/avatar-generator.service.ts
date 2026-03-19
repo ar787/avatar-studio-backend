@@ -2,6 +2,7 @@ import { bucket, db } from '../../../config/firebase.ts';
 import { InternalServerError } from '../../../utils/errors/ApiErrors.ts';
 import { imagenAPI } from '../providers/imagen.provider.ts';
 import * as avatarRepo from '../avatars.repository.ts';
+import * as avatarSharedService from './avatar-shared.service.ts';
 import { FieldValue } from 'firebase-admin/firestore';
 
 export const generateImages = async (prompt: string, userId: string) => {
@@ -19,6 +20,10 @@ export const generateImages = async (prompt: string, userId: string) => {
 
     await file.save(buffer, {
       contentType: 'image/png',
+      metadata: {
+        contentType: 'image/png',
+        contentDisposition: 'inline',
+      },
     });
     await avatarRepo.addImageToLibrary(userId, {
       url: imageUrl,
@@ -40,6 +45,11 @@ export const generateImages = async (prompt: string, userId: string) => {
 
 export const getGeneratedAvatars = async (userId: string) => {
   return avatarRepo.fetchGeneratedAvatars(userId);
+};
+
+export const getAvatarStream = (userId: string, fileName: string) => {
+  const filePath = `users/${userId}/generated-avatars/${fileName}`;
+  return avatarSharedService.getAvatarStream(fileName, filePath);
 };
 
 function buildAvatarPrompt(userInput: string) {

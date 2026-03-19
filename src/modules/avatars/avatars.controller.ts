@@ -45,6 +45,31 @@ export const getGeneratedAvatarsController = async (
   }
 };
 
+export const downloadAvatarFromLibrary = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  try {
+    const filename = req.params.filename;
+    if (!filename || typeof filename !== 'string') {
+      throw new BadRequestError('Filename is required');
+    }
+    const userId = req.user?.uid!;
+    const stream = await avatarGeneratorService.getAvatarStream(
+      userId,
+      filename,
+    );
+
+    res.setHeader('Content-Type', 'application/octet-stream');
+    res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+
+    stream.pipe(res);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const downloadAvatar = async (
   req: Request,
   res: Response,

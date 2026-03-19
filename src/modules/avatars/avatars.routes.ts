@@ -17,4 +17,10 @@ router.post(
   verifyAuthTokenHandler,
   avatarController.generatedImagesController,
 );
+
+router.get(
+  '/download-from-library/:filename',
+  verifyAuthTokenHandler,
+  avatarController.downloadAvatarFromLibrary,
+);
 export default router;
