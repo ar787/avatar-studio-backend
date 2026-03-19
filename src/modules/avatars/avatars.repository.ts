@@ -13,8 +13,10 @@ export const fetchGeneratedAvatars = async (userId: string) => {
     .collection('users')
     .doc(userId)
     .collection('generated-images')
+    .orderBy('createdAt', 'desc')
     .withConverter(generatedImageConverter)
     .get();
+
   return snapshot.docs.map((doc) => {
     const { storagePath, ...rest } = doc.data();
     const storagePathArr = storagePath.split('/');
