@@ -7,6 +7,12 @@ export class NotFoundError extends BaseError {
   }
 }
 
+export class ForbiddenError extends BaseError {
+  constructor(message: string) {
+    super('ForbiddenError', HttpStatusCode.FORBIDDEN, true, message);
+  }
+}
+
 export class BadRequestError extends BaseError {
   constructor(message: string) {
     super('BadRequestError', HttpStatusCode.BAD_REQUEST, true, message);

@@ -5,7 +5,7 @@ import { type Storage } from 'firebase-admin/storage';
 import serviceAccount from '../../serviceAccountKey.json' with { type: 'json' };
 import config from './config.ts';
 
-const { credential, firestore, storage: getStorage } = admin;
+const { credential, firestore: getFirestore, storage: getStorage } = admin;
 const cert = credential.cert(serviceAccount as admin.ServiceAccount);
 
 initializeApp({
@@ -14,5 +14,6 @@ initializeApp({
   storageBucket: config.firebaseStorageBucket,
 });
 
+export const firestore = getFirestore;
 export const db = firestore();
 export const bucket: ReturnType<Storage['bucket']> = getStorage().bucket();
