@@ -1,5 +1,5 @@
-import { NotFoundError } from '../../../utils/errors/ApiErrors.ts';
-import * as avatarRepo from '../avatars.repository.ts';
+import { NotFoundError } from '../../../utils/errors/ApiErrors.js';
+import * as avatarRepo from '../avatars.repository.js';
 
 export const getAvatarStream = async (fileName: string, filePath: string) => {
   const exists = await avatarRepo.checkFileExists(filePath);

@@ -1,11 +1,11 @@
 import { type NextFunction, type Request, type Response } from 'express';
-import * as catalogService from './service/avatar-public.service.ts';
-import * as avatarGeneratorService from './service/avatar-generator.service.ts';
+import * as catalogService from './service/avatar-public.service.js';
+import * as avatarGeneratorService from './service/avatar-generator.service.js';
 import {
   BadRequestError,
   UnauthorizedError,
-} from '../../utils/errors/ApiErrors.ts';
-import { HttpStatusCode } from '../../utils/httpStatusCodes.ts';
+} from '../../utils/errors/ApiErrors.js';
+import { HttpStatusCode } from '../../utils/httpStatusCodes.js';
 
 export const getAllPublicAvatarsController = async (
   _: Request,

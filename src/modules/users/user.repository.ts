@@ -1,6 +1,6 @@
-import { db, firestore } from '../../config/firebase.ts';
-import { NotFoundError } from '../../utils/errors/ApiErrors.ts';
-import { userProfileConverter } from './converter.ts';
+import { db, firestore } from '../../config/firebase.js';
+import { NotFoundError } from '../../utils/errors/ApiErrors.js';
+import { userProfileConverter } from './converter.js';
 
 export const getUserProfileData = async (userId: string) => {
   return await db

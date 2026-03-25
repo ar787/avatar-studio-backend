@@ -8,6 +8,7 @@
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
+    "moduleResolution": "nodenext",
     "target": "esnext",
     // For nodejs:
     "lib": ["esnext"],
@@ -22,9 +23,9 @@
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
-    "moduleResolution": "node16",
-    "noEmit": true,
-    "allowImportingTsExtensions": true,
+
+    "noEmit": false,
+    "allowImportingTsExtensions": false,
     // Style Options
     // "noImplicitReturns": true,
     // "noImplicitOverride": true,

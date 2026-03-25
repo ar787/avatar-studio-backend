@@ -1,4 +1,4 @@
-import { db } from '../../../config/firebase.ts';
+import { db } from '../../../config/firebase.js';
 
 export const initializeUser = async (user: {
   uid: string;

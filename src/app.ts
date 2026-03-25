@@ -1,8 +1,8 @@
 import express from 'express';
-import avatarRoutes from './modules/avatars/avatars.routes.ts';
-import authRoutes from './modules/auth/auth.routes.ts';
-import userRoutes from './modules/users/user.routes.ts';
-import { errorHandler } from './middlewares/error.middleware.ts';
+import avatarRoutes from './modules/avatars/avatars.routes.js';
+import authRoutes from './modules/auth/auth.routes.js';
+import userRoutes from './modules/users/user.routes.js';
+import { errorHandler } from './middlewares/error.middleware.js';
 
 const app = express();
 

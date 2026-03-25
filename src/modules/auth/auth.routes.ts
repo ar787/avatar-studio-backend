@@ -1,6 +1,6 @@
 import { Router } from 'express';
-import * as authController from './auth.controller.ts';
-import { verifyAuthTokenHandler } from '../../middlewares/verifyAuthToken.middleware.ts';
+import * as authController from './auth.controller.js';
+import { verifyAuthTokenHandler } from '../../middlewares/verifyAuthToken.middleware.js';
 
 const router = Router();
 

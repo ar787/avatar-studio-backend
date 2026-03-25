@@ -1,6 +1,6 @@
 import type { Request, Response, NextFunction } from 'express';
-import { BaseError } from '../utils/errors/BaseError.ts';
-import { HttpStatusCode } from '../utils/httpStatusCodes.ts';
+import { BaseError } from '../utils/errors/BaseError.js';
+import { HttpStatusCode } from '../utils/httpStatusCodes.js';
 
 export const errorHandler = (
   error: Error,

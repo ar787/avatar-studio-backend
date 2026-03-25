@@ -1,5 +1,5 @@
-import { HttpStatusCode } from '../httpStatusCodes.ts';
-import { BaseError } from './BaseError.ts';
+import { HttpStatusCode } from '../httpStatusCodes.js';
+import { BaseError } from './BaseError.js';
 
 export class NotFoundError extends BaseError {
   constructor(message: string) {

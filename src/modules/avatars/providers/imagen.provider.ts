@@ -1,6 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 
-import config from '../../../config/config.ts';
+import config from '../../../config/config.js';
 
 export const imagenAPI = async (prompt: string) => {
   const ai = new GoogleGenAI({ apiKey: config.geminiApiKey });

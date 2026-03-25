@@ -3,7 +3,7 @@ import {
   type FirestoreDataConverter,
   type QueryDocumentSnapshot,
 } from 'firebase-admin/firestore';
-import type { UserProfile } from './types.ts';
+import type { UserProfile } from './types.js';
 
 export const userProfileConverter: FirestoreDataConverter<UserProfile> = {
   toFirestore(userProfile) {

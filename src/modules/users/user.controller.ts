@@ -1,6 +1,6 @@
 import { type NextFunction, type Request, type Response } from 'express';
-import * as userService from './service/user.service.ts';
-import { HttpStatusCode } from '../../utils/httpStatusCodes.ts';
+import * as userService from './service/user.service.js';
+import { HttpStatusCode } from '../../utils/httpStatusCodes.js';
 
 export const getUserProfile = async (
   req: Request,

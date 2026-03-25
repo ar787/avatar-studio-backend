@@ -1,8 +1,8 @@
-import { InternalServerError } from '../../../utils/errors/ApiErrors.ts';
-import { imagenAPI } from '../providers/imagen.provider.ts';
-import * as avatarRepo from '../avatars.repository.ts';
-import * as avatarSharedService from './avatar-shared.service.ts';
-import * as userService from '../../users/service/user.service.ts';
+import { InternalServerError } from '../../../utils/errors/ApiErrors.js';
+import { imagenAPI } from '../providers/imagen.provider.js';
+import * as avatarRepo from '../avatars.repository.js';
+import * as avatarSharedService from './avatar-shared.service.js';
+import * as userService from '../../users/service/user.service.js';
 import { FieldValue } from 'firebase-admin/firestore';
 
 export const generateImages = async (prompt: string, userId: string) => {

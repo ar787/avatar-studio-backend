@@ -1,2 +1,2 @@
-export * from './BaseError.ts';
-export * from './ApiErrors.ts';
+export * from './BaseError.js';
+export * from './ApiErrors.js';

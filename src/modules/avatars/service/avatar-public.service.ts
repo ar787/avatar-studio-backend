@@ -1,5 +1,5 @@
-import * as avatarRepo from '../avatars.repository.ts';
-import * as avatarSharedService from './avatar-shared.service.ts';
+import * as avatarRepo from '../avatars.repository.js';
+import * as avatarSharedService from './avatar-shared.service.js';
 
 export const getAllPublicCatalog = () => {
   return avatarRepo.fetchPublicAvatarsRepo();

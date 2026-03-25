@@ -3,7 +3,7 @@ import admin from 'firebase-admin';
 import { type Storage } from 'firebase-admin/storage';
 
 import serviceAccount from '../../serviceAccountKey.json' with { type: 'json' };
-import config from './config.ts';
+import config from './config.js';
 
 const { credential, firestore: getFirestore, storage: getStorage } = admin;
 const cert = credential.cert(serviceAccount as admin.ServiceAccount);

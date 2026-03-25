@@ -1,8 +1,8 @@
 import {
   ForbiddenError,
   NotFoundError,
-} from '../../../utils/errors/ApiErrors.ts';
-import * as usersRepository from '../user.repository.ts';
+} from '../../../utils/errors/ApiErrors.js';
+import * as usersRepository from '../user.repository.js';
 
 export const getUserProfile = async (userId: string) => {
   const doc = await usersRepository.getUserProfileData(userId);
