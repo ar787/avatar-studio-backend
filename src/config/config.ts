@@ -12,7 +12,7 @@ type Config = {
 };
 
 const config: Config = {
-  port: Number(process.env.PORT) || 3000,
+  port: Number(process.env.PORT) || 8080,
   nodeEnv: process.env.NODE_ENV || 'development',
   geminiApiKey: process.env.GEMINI_API_KEY ?? '',
   firestoreEmulator: process.env.FIRESTORE_EMULATOR_HOST ?? '',
