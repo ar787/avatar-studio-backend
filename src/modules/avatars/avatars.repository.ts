@@ -35,8 +35,11 @@ export const getFileReference = (filePath: string): File => {
   return file as unknown as File;
 };
 
-export const downloadAvatar = async (file: File) => {
-  return await getDownloadURL(file as any);
+export const getSignedUrl = async (file: File) => {
+  return await file.getSignedUrl({
+    action: 'read',
+    expires: 60 * 60 * 1000, // 1 hour
+  });
 };
 
 export const checkFileExists = async (filePath: string) => {
