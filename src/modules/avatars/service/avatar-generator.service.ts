@@ -20,7 +20,6 @@ export const generateImages = async (prompt: string, userId: string) => {
       const extension = 'png';
       const storagePath = `users/${userId}/generated-avatars/${name}.${extension}`;
       const file = avatarRepo.getFileReference(storagePath);
-      const [url] = await avatarRepo.getSignedUrl(file);
 
       await file.save(buffer, {
         contentType: 'image/png',
@@ -29,6 +28,9 @@ export const generateImages = async (prompt: string, userId: string) => {
           contentDisposition: 'inline',
         },
       });
+
+      const [url] = await avatarRepo.getSignedUrl(file);
+
       await avatarRepo.addImageToLibrary(userId, {
         url,
         storagePath,
