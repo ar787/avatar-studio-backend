@@ -38,7 +38,7 @@ export const getFileReference = (filePath: string): File => {
 export const getSignedUrl = async (file: File) => {
   return await file.getSignedUrl({
     action: 'read',
-    expires: 60 * 60 * 1000, // 1 hour
+    expires: Date.now() + 60 * 60 * 1000, // 1 hour
   });
 };
 
