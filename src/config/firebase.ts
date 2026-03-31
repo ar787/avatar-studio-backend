@@ -10,7 +10,6 @@ initializeApp({
   projectId: config.firebaseProjectId,
   storageBucket: config.firebaseStorageBucket,
 });
-console.log(credential);
 
 export const firestore = getFirestore;
 export const db = firestore();

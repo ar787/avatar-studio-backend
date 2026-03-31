@@ -2,6 +2,7 @@ import { type File } from '@google-cloud/storage';
 import { db, bucket } from '../../config/firebase.js';
 import { generatedImageConverter } from './converter.js';
 import type { GeneratedImage } from './types.js';
+import { getDownloadURL } from 'firebase-admin/storage';
 
 export const fetchPublicAvatarsRepo = async () => {
   const snapshot = await db.collection('avatars').get();
@@ -32,6 +33,10 @@ export const fetchGeneratedAvatars = async (userId: string) => {
 export const getFileReference = (filePath: string): File => {
   const file = bucket.file(filePath);
   return file as unknown as File;
+};
+
+export const downloadAvatar = async (file: File) => {
+  return await getDownloadURL(file as any);
 };
 
 export const checkFileExists = async (filePath: string) => {

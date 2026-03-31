@@ -20,7 +20,7 @@ export const generateImages = async (prompt: string, userId: string) => {
       const extension = 'png';
       const storagePath = `users/${userId}/generated-avatars/${name}.${extension}`;
       const file = avatarRepo.getFileReference(storagePath);
-      const imageUrl = file.publicUrl();
+      const imageUrl = await avatarRepo.downloadAvatar(file);
 
       await file.save(buffer, {
         contentType: 'image/png',
