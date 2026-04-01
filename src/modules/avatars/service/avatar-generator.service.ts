@@ -4,6 +4,8 @@ import * as avatarRepo from '../avatars.repository.js';
 import * as avatarSharedService from './avatar-shared.service.js';
 import * as userService from '../../users/service/user.service.js';
 import { FieldValue } from 'firebase-admin/firestore';
+import { v4 as uuidv4 } from 'uuid';
+import config from '../../../config/config.js';
 
 export const generateImages = async (prompt: string, userId: string) => {
   const remainingCredits = await userService.deductCredits(userId, 1);
@@ -20,16 +22,27 @@ export const generateImages = async (prompt: string, userId: string) => {
       const extension = 'png';
       const storagePath = `users/${userId}/generated-avatars/${name}.${extension}`;
       const file = avatarRepo.getFileReference(storagePath);
+      const downloadToken = uuidv4();
+      const bucketName = config.firebaseStorageBucket;
+      const encodedPath = encodeURIComponent(storagePath);
+
+      const url = avatarRepo.getPermanentUrl(
+        bucketName,
+        encodedPath,
+        downloadToken,
+      );
 
       await file.save(buffer, {
+        resumable: false,
         contentType: 'image/png',
         metadata: {
           contentType: 'image/png',
           contentDisposition: 'inline',
+          metadata: {
+            firebaseStorageDownloadTokens: downloadToken,
+          },
         },
       });
-
-      const [url] = await avatarRepo.getSignedUrl(file);
 
       await avatarRepo.addImageToLibrary(userId, {
         url,
@@ -38,6 +51,7 @@ export const generateImages = async (prompt: string, userId: string) => {
         prompt,
         createdAt: FieldValue.serverTimestamp(),
       });
+
       return url;
     });
 

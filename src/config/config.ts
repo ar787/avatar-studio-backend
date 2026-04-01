@@ -9,6 +9,7 @@ type Config = {
   firestoreEmulator: string;
   firebaseProjectId: string;
   firebaseStorageBucket: string;
+  storageBaseUrl: string;
 };
 
 const config: Config = {
@@ -18,6 +19,10 @@ const config: Config = {
   firestoreEmulator: process.env.FIRESTORE_EMULATOR_HOST ?? '',
   firebaseStorageBucket: process.env.FIREBASE_STORAGE_BUCKET ?? '',
   firebaseProjectId: process.env.FIREBASE_PROJECT_ID ?? '',
+  storageBaseUrl:
+    process.env.NODE_ENV === 'development'
+      ? `http://${process.env.FIREBASE_STORAGE_EMULATOR_HOST}/v0/b`
+      : `https://firebasestorage.googleapis.com/v0/b`,
 };
 
 export default config;

@@ -2,7 +2,7 @@ import { type File } from '@google-cloud/storage';
 import { db, bucket } from '../../config/firebase.js';
 import { generatedImageConverter } from './converter.js';
 import type { GeneratedImage } from './types.js';
-import { getDownloadURL } from 'firebase-admin/storage';
+import config from '../../config/config.js';
 
 export const fetchPublicAvatarsRepo = async () => {
   const snapshot = await db.collection('avatars').get();
@@ -35,13 +35,6 @@ export const getFileReference = (filePath: string): File => {
   return file as unknown as File;
 };
 
-export const getSignedUrl = async (file: File) => {
-  return await file.getSignedUrl({
-    action: 'read',
-    expires: Date.now() + 60 * 60 * 1000, // 1 hour
-  });
-};
-
 export const checkFileExists = async (filePath: string) => {
   const [exist] = await bucket.file(filePath).exists();
   return exist;
@@ -56,7 +49,15 @@ export const addImageToLibrary = async (
     .doc(userId)
     .collection('generated-images');
 
-  const docRef = await userImagesRef.add({ ...doc });
+  const docRef = await userImagesRef.add(doc);
 
   return docRef.id;
+};
+
+export const getPermanentUrl = (
+  bucketName: string,
+  encodedPath: string,
+  downloadToken: string,
+) => {
+  return `${config.storageBaseUrl}/${bucketName}/o/${encodedPath}?alt=media&token=${downloadToken}`;
 };
