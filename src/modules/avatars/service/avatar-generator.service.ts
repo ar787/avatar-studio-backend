@@ -58,10 +58,8 @@ export const generateImages = async (prompt: string, userId: string) => {
     const generatedUrls = await Promise.all(uploadPromises);
 
     return {
-      data: {
-        generatedAvatarUrls: generatedUrls,
-        remainingCredits,
-      },
+      generatedAvatarUrls: generatedUrls,
+      remainingCredits,
       message: 'Images generated and stored successfully',
     };
   } catch (error) {
