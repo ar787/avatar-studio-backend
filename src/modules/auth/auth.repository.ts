@@ -19,3 +19,8 @@ export const createUserProfile = (user: User) => {
     credits: 5,
   });
 };
+
+export const findByUserId = async (userId: string) => {
+  const userDoc = await db.collection('users').doc(userId).get();
+  return userDoc.exists;
+};

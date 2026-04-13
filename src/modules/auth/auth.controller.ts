@@ -14,11 +14,16 @@ export const createUserDocument = async (
       return next(new UnauthorizedError('User not authorized'));
     }
 
-    await authService.initializeUser(user);
-
+    const { isNew } = await authService.initializeUser(user);
+    if (!isNew) {
+      return res.status(HttpStatusCode.OK).json({
+        success: true,
+        message: 'User profile already exists',
+      });
+    }
     res.status(HttpStatusCode.CREATED).json({
       success: true,
-      message: 'Profile ready',
+      message: 'User profile initialized successfully',
     });
   } catch (error) {
     next(error);
