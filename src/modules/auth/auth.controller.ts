@@ -13,12 +13,8 @@ export const createUserDocument = async (
     if (!user) {
       return next(new UnauthorizedError('User not authorized'));
     }
-    const { uid, email, name } = user;
-    await authService.initializeUser({
-      uid,
-      email,
-      displayName: name,
-    });
+
+    await authService.initializeUser(user);
 
     res.status(HttpStatusCode.CREATED).json({
       success: true,

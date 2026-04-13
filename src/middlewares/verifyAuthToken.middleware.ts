@@ -32,13 +32,15 @@ export const verifyAuthTokenHandler = async (
 
   try {
     const decodedToken = await admin.auth().verifyIdToken(idToken);
+
     req.user = {
       uid: decodedToken.uid,
-      email: decodedToken.email,
-      emailVerified: decodedToken.email_verified,
-      name: decodedToken.name,
-      picture: decodedToken.picture,
+      email: decodedToken.email ?? '',
+      emailVerified: decodedToken.email_verified ?? false,
+      displayName: decodedToken.name ?? '',
+      picture: decodedToken.picture ?? '',
     };
+
     next();
   } catch (error) {
     const message = firebaseTokenErrorMapper(error);

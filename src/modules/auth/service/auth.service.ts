@@ -1,22 +1,7 @@
-import { db } from '../../../config/firebase.js';
+import type { User } from '../../users/types.js';
+import * as authRepository from './../auth.repository.js';
 
-export const initializeUser = async (user: {
-  uid: string;
-  email: string | undefined;
-  displayName: string | undefined;
-}) => {
-  const userRef = db.collection('users').doc(user.uid);
-
-  await userRef.set(
-    {
-      email: user.email,
-      displayName: user.displayName || 'New User',
-      createdAt: new Date(),
-      isPremium: false,
-      credits: 5,
-    },
-    { merge: true },
-  );
-
+export const initializeUser = async (user: User) => {
+  await authRepository.createUserProfile(user);
   return { message: 'User profile initialized' };
 };

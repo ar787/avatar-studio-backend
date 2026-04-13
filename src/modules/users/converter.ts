@@ -10,8 +10,10 @@ export const userProfileConverter: FirestoreDataConverter<UserProfile> = {
     return {
       email: userProfile.email,
       displayName: userProfile.displayName,
+      picture: userProfile.picture,
       isPremium: userProfile.isPremium,
       credits: userProfile.credits,
+      emailVerified: userProfile.emailVerified,
       createdAt: userProfile.createdAt || FieldValue.serverTimestamp(),
     };
   },
@@ -20,7 +22,9 @@ export const userProfileConverter: FirestoreDataConverter<UserProfile> = {
     return {
       email: data.email,
       displayName: data.displayName,
+      picture: data.picture,
       isPremium: data.isPremium,
+      emailVerified: data.emailVerified,
       credits: data.credits,
       createdAt: data.createdAt?.toDate() || new Date(),
     };

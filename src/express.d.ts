@@ -1,18 +1,11 @@
 import type { Request } from 'express';
 import admin from 'firebase-admin';
-
-interface AuthenticatedUser {
-  uid: string;
-  name?: string | undefined;
-  email?: string | undefined;
-  emailVerified?: boolean | undefined;
-  picture?: string | undefined;
-}
+import type { User } from './modules/users/types.ts';
 
 declare global {
   namespace Express {
     interface Request {
-      user?: AuthenticatedUser;
+      user?: User;
     }
   }
 }
