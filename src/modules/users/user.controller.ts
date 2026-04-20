@@ -49,3 +49,27 @@ export const updateProfile = async (
     next(error);
   }
 };
+
+export const updateProfileImage = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
+  const userId = req.user?.uid;
+  const file = req.file;
+
+  if (!userId) {
+    throw new UnauthorizedError('User ID not found in request');
+  }
+
+  if (!file) {
+    throw new BadRequestError('No file uploaded');
+  }
+
+  try {
+    const result = await userService.uploadAvatar(userId, file);
+    res.status(HttpStatusCode.OK).json({ success: true, message: result });
+  } catch (error) {
+    next(error);
+  }
+};

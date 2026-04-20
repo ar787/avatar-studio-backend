@@ -25,6 +25,23 @@ export const updateUserProfile = async (
   });
 };
 
+export const uploadImage = async (
+  storagePath: string,
+  file: Express.Multer.File,
+  downloadToken: string,
+) => {
+  const fileUpload = bucket.file(storagePath);
+
+  await fileUpload.save(file.buffer, {
+    metadata: {
+      contentType: file.mimetype,
+      metadata: {
+        firebaseStorageDownloadTokens: downloadToken,
+      },
+    },
+  });
+};
+
 export const checkIsDocExists = (doc: FirebaseFirestore.DocumentSnapshot) => {
   return doc.exists;
 };
