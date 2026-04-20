@@ -1,11 +1,8 @@
 import { v4 as uuidv4 } from 'uuid';
-import {
-  ForbiddenError,
-  NotFoundError,
-} from '../../../utils/errors/ApiErrors.js';
+import { ForbiddenError, NotFoundError } from '@/utils/errors/ApiErrors.js';
 
 import * as usersRepository from '../user.repository.js';
-import config from '../../../config/config.js';
+import config from '@/config/config.js';
 
 export const getUserProfile = async (userId: string) => {
   const doc = await usersRepository.getUserProfileData(userId);

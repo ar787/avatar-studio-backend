@@ -1,5 +1,5 @@
-import { bucket, db, firestore } from '../../config/firebase.js';
-import { NotFoundError } from '../../utils/errors/ApiErrors.js';
+import { bucket, db, firestore } from '@/config/firebase.js';
+import { NotFoundError } from '@/utils/errors/ApiErrors.js';
 import { userProfileConverter } from './converter.js';
 import type { UserProfile } from './types.js';
 

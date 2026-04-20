@@ -1,5 +1,5 @@
-import type { User } from '../../users/types.js';
-import * as authRepository from './../auth.repository.js';
+import type { User } from '@/modules/users/types.js';
+import * as authRepository from '../auth.repository.js';
 
 export const initializeUser = async (user: User) => {
   const isUserExist = await authRepository.findByUserId(user.uid);

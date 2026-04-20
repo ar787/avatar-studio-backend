@@ -1,8 +1,8 @@
 import { type File } from '@google-cloud/storage';
-import { db, bucket } from '../../config/firebase.js';
+import { db, bucket } from '@/config/firebase.js';
 import { generatedImageConverter } from './converter.js';
 import type { GeneratedImage } from './types.js';
-import config from '../../config/config.js';
+import config from '@/config/config.js';
 
 export const fetchPublicAvatarsRepo = async () => {
   const snapshot = await db.collection('avatars').get();

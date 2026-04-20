@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
 import admin from 'firebase-admin';
-import { UnauthorizedError } from '../utils/errors/ApiErrors.js';
-import { firebaseTokenErrorMapper } from '../utils/firebaseTokenErrorMapper.js';
+import { UnauthorizedError } from '@/utils/errors/ApiErrors.js';
+import { firebaseTokenErrorMapper } from '@/utils/firebaseTokenErrorMapper.js';
 
 export const verifyAuthTokenHandler = async (
   req: Request,

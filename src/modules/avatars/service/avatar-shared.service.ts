@@ -1,4 +1,4 @@
-import { NotFoundError } from '../../../utils/errors/ApiErrors.js';
+import { NotFoundError } from '@/utils/errors/ApiErrors.js';
 import * as avatarRepo from '../avatars.repository.js';
 
 export const getAvatarStream = async (fileName: string, filePath: string) => {
