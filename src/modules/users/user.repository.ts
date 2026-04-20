@@ -1,6 +1,7 @@
-import { db, firestore } from '../../config/firebase.js';
+import { bucket, db, firestore } from '../../config/firebase.js';
 import { NotFoundError } from '../../utils/errors/ApiErrors.js';
 import { userProfileConverter } from './converter.js';
+import type { UserProfile } from './types.js';
 
 export const getUserProfileData = async (userId: string) => {
   return await db
@@ -8,6 +9,20 @@ export const getUserProfileData = async (userId: string) => {
     .doc(userId)
     .withConverter(userProfileConverter)
     .get();
+};
+
+export const updateUserProfile = async (
+  userId: string,
+  userProfile: Partial<UserProfile>,
+) => {
+  const userRef = db
+    .collection('users')
+    .doc(userId)
+    .withConverter(userProfileConverter);
+
+  return await userRef.update({
+    ...userProfile,
+  });
 };
 
 export const checkIsDocExists = (doc: FirebaseFirestore.DocumentSnapshot) => {

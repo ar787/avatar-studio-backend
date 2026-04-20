@@ -10,4 +10,10 @@ router.get(
   userController.getUserProfile,
 );
 
+router.patch(
+  '/updateProfile',
+  verifyAuthTokenHandler,
+  userController.updateProfile,
+);
+
 export default router;

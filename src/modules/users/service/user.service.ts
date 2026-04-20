@@ -14,6 +14,12 @@ export const getUserProfile = async (userId: string) => {
   return doc.data();
 };
 
+export const renameUser = (userId: string, newDisplayName: string) => {
+  return usersRepository.updateUserProfile(userId, {
+    displayName: newDisplayName,
+  });
+};
+
 export const deductCredits = (userId: string, amount: number) => {
   return usersRepository.runUpdateCreditTransaction(
     userId,
