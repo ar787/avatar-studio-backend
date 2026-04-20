@@ -5,6 +5,9 @@ import { verifyAuthTokenHandler } from '../../middlewares/verifyAuthToken.middle
 
 const upload = multer({
   storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 3 * 1024 * 1024,
+  },
 });
 
 const router = Router();
