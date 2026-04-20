@@ -1,11 +1,11 @@
 import { type NextFunction, type Request, type Response } from 'express';
 import * as userService from './service/user.service.js';
-import { HttpStatusCode } from '../../utils/httpStatusCodes.js';
+import { HttpStatusCode } from '@/utils/httpStatusCodes.js';
 import type { UserProfile } from './types.js';
 import {
   BadRequestError,
   UnauthorizedError,
-} from '../../utils/errors/ApiErrors.js';
+} from '@/utils/errors/ApiErrors.js';
 
 export const getUserProfile = async (
   req: Request,

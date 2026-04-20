@@ -1,11 +1,12 @@
-import { InternalServerError } from '../../../utils/errors/ApiErrors.js';
+import { FieldValue } from 'firebase-admin/firestore';
+import { v4 as uuidv4 } from 'uuid';
+
+import { InternalServerError } from '@/utils/errors/ApiErrors.js';
 import { imagenAPI } from '../providers/imagen.provider.js';
 import * as avatarRepo from '../avatars.repository.js';
 import * as avatarSharedService from './avatar-shared.service.js';
-import * as userService from '../../users/service/user.service.js';
-import { FieldValue } from 'firebase-admin/firestore';
-import { v4 as uuidv4 } from 'uuid';
-import config from '../../../config/config.js';
+import * as userService from '@/modules/users/service/user.service.js';
+import config from '@/config/config.js';
 
 export const generateImages = async (prompt: string, userId: string) => {
   const remainingCredits = await userService.deductCredits(userId, 1);

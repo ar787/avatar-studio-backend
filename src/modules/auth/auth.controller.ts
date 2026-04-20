@@ -1,7 +1,7 @@
 import { type NextFunction, type Request, type Response } from 'express';
 import * as authService from './service/auth.service.js';
-import { HttpStatusCode } from '../../utils/httpStatusCodes.js';
-import { UnauthorizedError } from '../../utils/errors/ApiErrors.js';
+import { HttpStatusCode } from '@/utils/httpStatusCodes.js';
+import { UnauthorizedError } from '@/utils/errors/ApiErrors.js';
 
 export const createUserDocument = async (
   req: Request,

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import * as avatarController from './avatars.controller.js';
-import { verifyAuthTokenHandler } from '../../middlewares/verifyAuthToken.middleware.js';
+import { verifyAuthTokenHandler } from '@/middlewares/verifyAuthToken.middleware.js';
 
 const router = Router();
 

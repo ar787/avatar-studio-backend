@@ -4,8 +4,8 @@ import * as avatarGeneratorService from './service/avatar-generator.service.js';
 import {
   BadRequestError,
   UnauthorizedError,
-} from '../../utils/errors/ApiErrors.js';
-import { HttpStatusCode } from '../../utils/httpStatusCodes.js';
+} from '@/utils/errors/ApiErrors.js';
+import { HttpStatusCode } from '@/utils/httpStatusCodes.js';
 
 export const getAllPublicAvatarsController = async (
   _: Request,

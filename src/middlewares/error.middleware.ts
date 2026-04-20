@@ -1,7 +1,7 @@
 import type { Request, Response, NextFunction } from 'express';
-import { BaseError } from '../utils/errors/BaseError.js';
-import { HttpStatusCode } from '../utils/httpStatusCodes.js';
-import { FileTooLargeError } from '../utils/errors/ApiErrors.js';
+import { BaseError } from '@/utils/errors/BaseError.js';
+import { HttpStatusCode } from '@/utils/httpStatusCodes.js';
+import { FileTooLargeError } from '@/utils/errors/ApiErrors.js';
 
 export const errorHandler = (
   error: any,

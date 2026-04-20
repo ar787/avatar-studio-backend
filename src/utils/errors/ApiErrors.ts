@@ -1,4 +1,4 @@
-import { HttpStatusCode } from '../httpStatusCodes.js';
+import { HttpStatusCode } from '@/utils/httpStatusCodes.js';
 import { BaseError } from './BaseError.js';
 
 export class NotFoundError extends BaseError {

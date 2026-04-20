@@ -1,8 +1,8 @@
 import { Router } from 'express';
 import multer from 'multer';
 import * as userController from './user.controller.js';
-import { verifyAuthTokenHandler } from '../../middlewares/verifyAuthToken.middleware.js';
-import { BadRequestError } from '../../utils/errors/ApiErrors.js';
+import { verifyAuthTokenHandler } from '@/middlewares/verifyAuthToken.middleware.js';
+import { BadRequestError } from '@/utils/errors/ApiErrors.js';
 
 const upload = multer({
   storage: multer.memoryStorage(),

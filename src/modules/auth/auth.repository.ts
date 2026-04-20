@@ -1,7 +1,7 @@
-import { db } from '../../config/firebase.js';
-import normalizeEmailToName from '../../utils/normalizeEmailToName.js';
-import type { User } from '../users/types.js';
-import { userProfileConverter } from '../users/converter.js';
+import { db } from '@/config/firebase.js';
+import normalizeEmailToName from '@/utils/normalizeEmailToName.js';
+import type { User } from '@/modules/users/types.js';
+import { userProfileConverter } from '@/modules/users/converter.js';
 
 export const createUserProfile = (user: User) => {
   const userRef = db
