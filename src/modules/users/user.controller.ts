@@ -67,8 +67,8 @@ export const updateProfileImage = async (
   }
 
   try {
-    const result = await userService.uploadAvatar(userId, file);
-    res.status(HttpStatusCode.OK).json({ success: true, message: result });
+    const { message, picture } = await userService.uploadAvatar(userId, file);
+    res.status(HttpStatusCode.OK).json({ success: true, message, picture });
   } catch (error) {
     next(error);
   }

@@ -40,7 +40,10 @@ export const uploadAvatar = async (
     picture: permanentUrl,
   });
 
-  return 'Profile picture has successfully uploaded and updated';
+  return {
+    picture: permanentUrl,
+    message: 'Profile picture has successfully uploaded and updated',
+  };
 };
 
 export const deductCredits = (userId: string, amount: number) => {
