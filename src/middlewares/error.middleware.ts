@@ -1,13 +1,18 @@
 import type { Request, Response, NextFunction } from 'express';
 import { BaseError } from '../utils/errors/BaseError.js';
 import { HttpStatusCode } from '../utils/httpStatusCodes.js';
+import { FileTooLargeError } from '../utils/errors/ApiErrors.js';
 
 export const errorHandler = (
-  error: Error,
+  error: any,
   req: Request,
   res: Response,
   next: NextFunction,
 ) => {
+  if (error.code === 'LIMIT_FILE_SIZE') {
+    error = new FileTooLargeError('File is too large. Maximum size is 3MB.');
+  }
+
   if (error instanceof BaseError && error.isOperational) {
     return res.status(error.statusCode).json({
       success: false,

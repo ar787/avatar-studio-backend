@@ -25,6 +25,12 @@ export class UnauthorizedError extends BaseError {
   }
 }
 
+export class FileTooLargeError extends BaseError {
+  constructor(message: string = 'File is to large') {
+    super('FileTooLargeError', HttpStatusCode.CONTENT_TO_LARGE, true, message);
+  }
+}
+
 export class InternalServerError extends BaseError {
   constructor(message: string = 'Internal Server Error') {
     super(
