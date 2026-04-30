@@ -13,6 +13,7 @@ export const getAllPublicAvatarsController = async (
   next: NextFunction,
 ) => {
   try {
+    console.log('test');
     const avatars = await catalogService.getAllPublicCatalog();
     res.status(HttpStatusCode.OK).json({
       success: true,
