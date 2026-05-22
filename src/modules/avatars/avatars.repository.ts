@@ -24,6 +24,7 @@ export const fetchGeneratedAvatars = async (userId: string) => {
     const name = storagePathArr[storagePathArr.length - 1];
 
     return {
+      id: doc.id,
       ...rest,
       name,
     };
