@@ -187,12 +187,10 @@ export const deleteAlbumAvatar = async (
     }
 
     await albumsService.deleteAvatarFromAlbum(userId, albumId, avatarId);
-    res
-      .status(HttpStatusCode.OK)
-      .json({
-        success: true,
-        message: 'Avatar successfully deleted from album',
-      });
+    res.status(HttpStatusCode.OK).json({
+      success: true,
+      message: 'Avatar successfully deleted from album',
+    });
   } catch (error) {
     next(error);
   }

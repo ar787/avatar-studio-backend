@@ -37,13 +37,16 @@ jobs:
 
       - name: Run tests with Firebase Emulator
         run: firebase emulators:exec --only firestore,storage --project demo-test 'npm test'
-        continue-on-error: true
         env:
           FIREBASE_PROJECT_ID: demo-test
           FIREBASE_STORAGE_BUCKET: demo-test.appspot.com
 
+      - name: Convert JUnit report to CTRF
+        if: always()
+        run: npx junit-to-ctrf ctrf/junit.xml -o ctrf/ctrf-report.json
+
       - name: Publish Test Summary Results
         if: always()
-        run: npx github-actions-ctrf ctrf/ctrf-report.json
+        run: npx github-actions-ctrf pull-request ctrf/ctrf-report.json
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

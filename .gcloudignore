@@ -2,3 +2,13 @@
 serviceAccountKey.json
 node_modules/
 .git
+.github/
+.husky/
+
+# Test files
+**/*.test.ts
+src/test/
+**/__mocks__/
+vitest.config.ts
+coverage/
+ctrf/

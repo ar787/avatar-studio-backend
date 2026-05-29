@@ -13,13 +13,12 @@ export const getAllPublicAvatarsController = async (
   next: NextFunction,
 ) => {
   try {
-    console.log('test', 3123);
     const avatars = await catalogService.getAllPublicCatalog();
     res.status(HttpStatusCode.OK).json({
       success: true,
       data: avatars,
     });
-  } catch (error: any) {
+  } catch (error) {
     next(error);
   }
 };
@@ -41,7 +40,7 @@ export const getGeneratedAvatarsController = async (
       success: true,
       data: generatedAvatars,
     });
-  } catch (error: any) {
+  } catch (error) {
     next(error);
   }
 };
@@ -56,7 +55,11 @@ export const downloadAvatarFromLibrary = async (
     if (!filename || typeof filename !== 'string') {
       throw new BadRequestError('Filename is required');
     }
-    const userId = req.user?.uid!;
+    const userId = req.user?.uid;
+    if (!userId) {
+      next(new UnauthorizedError('User not authorized'));
+      return;
+    }
     const stream = await avatarGeneratorService.getAvatarStream(
       userId,
       filename,
@@ -88,7 +91,7 @@ export const downloadAvatar = async (
     res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
 
     stream.pipe(res);
-  } catch (error: any) {
+  } catch (error) {
     next(error);
   }
 };
@@ -108,7 +111,7 @@ export const generatedImagesController = async (
       user.uid,
     );
     res.status(HttpStatusCode.OK).json({ success: true, data: result });
-  } catch (error: any) {
+  } catch (error) {
     next(error);
   }
 };

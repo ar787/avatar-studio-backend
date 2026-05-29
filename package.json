@@ -4,11 +4,14 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "dev": "nodemon --exec npx tsx src/server.ts",
     "build": "tsc && tsc-alias",
     "start": "node dist/server.js",
-    "lint": "eslint 'src/**/*.ts'"
+    "lint": "eslint 'src/**/*.ts'",
+    "prepare": "husky"
   },
   "keywords": [],
   "author": "",
@@ -28,14 +31,24 @@
     "@types/express": "^5.0.6",
     "@types/multer": "^2.1.0",
     "@types/node": "^25.2.2",
+    "@types/supertest": "^7.2.0",
+    "@vitest/coverage-v8": "^4.1.7",
     "eslint": "^10.0.0",
     "eslint-plugin-prettier": "^5.5.5",
     "globals": "^17.3.0",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.0.5",
     "nodemon": "^3.1.11",
     "prettier": "^3.8.1",
+    "supertest": "^7.2.2",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.17",
     "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.59.4",
+    "vitest": "^4.1.7"
+  },
+  "lint-staged": {
+    "src/**/*.ts": "eslint --max-warnings=0"
   }
 }
