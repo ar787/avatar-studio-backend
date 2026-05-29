@@ -27,6 +27,12 @@ dist-ssr
 # Service account key
 serviceAccountKey.json
 
+# Test coverage
+coverage/
+
+# Test reports
+ctrf/
+
 #firebase
 seed-data
 seed.ts
