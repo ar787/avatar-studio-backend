@@ -109,6 +109,7 @@ export const generatedImagesController = async (
     const result = await avatarGeneratorService.generateImages(
       req.body.prompt,
       user.uid,
+      req.body.style,
     );
     res.status(HttpStatusCode.OK).json({ success: true, data: result });
   } catch (error) {

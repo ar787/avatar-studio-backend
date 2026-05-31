@@ -153,6 +153,26 @@ describe('POST /api/avatars/generate', () => {
     expect(mockGenerateImages).toHaveBeenCalledWith(
       'a robot',
       TestFactory.CONTROLLER_UID,
+      undefined,
+    );
+  });
+
+  it('forwards the style from the request body to the service', async () => {
+    mockGenerateImages.mockResolvedValue({
+      generatedAvatarUrls: [],
+      remainingCredits: 2,
+      message: 'ok',
+    });
+
+    await request(app)
+      .post('/api/avatars/generate')
+      .set(AUTH)
+      .send({ prompt: 'a wizard', style: 'anime' });
+
+    expect(mockGenerateImages).toHaveBeenCalledWith(
+      'a wizard',
+      TestFactory.CONTROLLER_UID,
+      'anime',
     );
   });
 
