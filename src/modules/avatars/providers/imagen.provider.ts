@@ -10,6 +10,7 @@ export const imagenAPI = async (prompt: string) => {
     prompt,
     config: {
       numberOfImages: 1,
+      aspectRatio: '1:1',
     },
   });
 
