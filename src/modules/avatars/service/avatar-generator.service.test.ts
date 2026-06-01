@@ -47,6 +47,7 @@ import {
   generateImages,
   getGeneratedAvatars,
   getAvatarStream,
+  STYLE_TEMPLATES,
 } from './avatar-generator.service.js';
 import { InternalServerError } from '@/utils/errors/ApiErrors.js';
 
@@ -154,5 +155,46 @@ describe('getAvatarStream', () => {
       'users/user-789/generated-avatars/image-123.png',
     );
     expect(result).toBe(fakeStream);
+  });
+});
+
+describe('generateImages — style templates', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetFileReference.mockReturnValue(mockFile);
+    mockGetPermanentUrl.mockReturnValue('https://storage.example.com/img.png');
+    mockFile.save.mockResolvedValue(undefined);
+    mockAddImageToLibrary.mockResolvedValue('doc-id-abc');
+    mockDeductCredits.mockResolvedValue(4);
+    mockImagenAPI.mockResolvedValue([Buffer.from('bytes')]);
+  });
+
+  it.each(
+    Object.keys(STYLE_TEMPLATES).filter((k) => k !== 'none') as Exclude<
+      keyof typeof STYLE_TEMPLATES,
+      'none'
+    >[],
+  )('injects the %s style lines into the prompt', async (style) => {
+    await generateImages('a person', 'user-1', style);
+
+    expect(mockImagenAPI).toHaveBeenCalledWith(
+      expect.stringContaining(STYLE_TEMPLATES[style]),
+    );
+  });
+
+  it('falls back to the "none" style when style is omitted', async () => {
+    await generateImages('a person', 'user-1');
+
+    expect(mockImagenAPI).toHaveBeenCalledWith(
+      expect.stringContaining(STYLE_TEMPLATES.none),
+    );
+  });
+
+  it('uses the "none" style when style is explicitly "none"', async () => {
+    await generateImages('a person', 'user-1', 'none');
+
+    expect(mockImagenAPI).toHaveBeenCalledWith(
+      expect.stringContaining(STYLE_TEMPLATES.none),
+    );
   });
 });
