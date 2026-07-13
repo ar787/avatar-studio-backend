@@ -2,6 +2,7 @@ import { BadRequestError, NotFoundError } from '@/utils/errors/ApiErrors.js';
 import * as albumsRepo from '../albums.repository.js';
 import { getAvatarStream } from '@/modules/avatars/service/avatar-shared.service.js';
 import type { Album, UpdateAlbumPayload } from '../types.js';
+import type { PresetType } from '@/modules/avatars/types.js';
 
 export const getUserAlbums = async (userId: string): Promise<Album[]> => {
   return albumsRepo.fetchUserAlbums(userId);
@@ -91,6 +92,30 @@ export const deleteAvatarFromAlbum = async (
   if (!avatar) throw new NotFoundError('Avatar not found in album');
 
   await albumsRepo.deleteAvatarFromAlbum(userId, albumId, avatarId);
+};
+
+export const addUploadedAvatarToAlbum = async (
+  albumId: string,
+  userId: string,
+  avatar: {
+    avatarId: string;
+    url: string;
+    prompt: string;
+    extension: string;
+    adjustments?: Record<string, number>;
+    preset?: PresetType;
+  },
+) => {
+  const album = await albumsRepo.fetchAlbumById(albumId, userId);
+  if (!album) throw new NotFoundError('Album not found');
+
+  const createdAt = new Date().toISOString();
+  const id = await albumsRepo.insertAvatarIntoAlbum(albumId, userId, {
+    ...avatar,
+    createdAt,
+  });
+
+  return { id, ...avatar, createdAt };
 };
 
 export const addToAlbum = async (

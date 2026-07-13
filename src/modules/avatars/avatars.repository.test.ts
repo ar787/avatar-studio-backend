@@ -4,12 +4,14 @@
 import { describe, it, expect, afterEach, beforeEach } from 'vitest';
 
 import { FieldValue } from 'firebase-admin/firestore';
-import { db } from '@/config/firebase.js';
+import { db, bucket } from '@/config/firebase.js';
 import {
   addImageToLibrary,
   fetchGeneratedAvatars,
   fetchPublicAvatarsRepo,
   getPermanentUrl,
+  uploadImage,
+  getAvatarById,
 } from './avatars.repository.js';
 import { TestFactory } from '@/test/factories.js';
 
@@ -145,5 +147,86 @@ describe('getPermanentUrl', () => {
     expect(url).toContain('users%2Fu1%2Fimg.png');
     expect(url).toContain('token-abc');
     expect(url).toContain('alt=media');
+  });
+});
+
+const UPLOAD_PATH = `users/${TEST_USER_ID}/generated-avatars/test-upload.png`;
+const FAKE_FILE = {
+  buffer: Buffer.from('fake-png-bytes'),
+  mimetype: 'image/png',
+  originalname: 'test-upload.png',
+} as Express.Multer.File;
+
+describe('uploadImage', () => {
+  afterEach(async () => {
+    const [exists] = await bucket.file(UPLOAD_PATH).exists();
+    if (exists) await bucket.file(UPLOAD_PATH).delete();
+  });
+
+  it('uploads the file so it exists in storage', async () => {
+    await uploadImage(UPLOAD_PATH, FAKE_FILE, 'test-token');
+
+    const [exists] = await bucket.file(UPLOAD_PATH).exists();
+    expect(exists).toBe(true);
+  });
+
+  it('sets the correct content type on the uploaded file', async () => {
+    await uploadImage(UPLOAD_PATH, FAKE_FILE, 'test-token');
+
+    const [metadata] = await bucket.file(UPLOAD_PATH).getMetadata();
+    expect(metadata.contentType).toBe('image/png');
+  });
+
+  it('stores the download token in the file metadata', async () => {
+    await uploadImage(UPLOAD_PATH, FAKE_FILE, 'my-download-token');
+
+    const [metadata] = await bucket.file(UPLOAD_PATH).getMetadata();
+    expect(
+      (metadata.metadata as Record<string, string> | undefined)
+        ?.firebaseStorageDownloadTokens,
+    ).toBe('my-download-token');
+  });
+});
+
+describe('getAvatarById', () => {
+  afterEach(() => clearUserImages(TEST_USER_ID));
+
+  it('returns undefined when the document does not exist', async () => {
+    const result = await getAvatarById('non-existent-id', TEST_USER_ID);
+
+    expect(result).toBeUndefined();
+  });
+
+  it('returns the avatar data when the document exists', async () => {
+    const id = await addImageToLibrary(
+      TEST_USER_ID,
+      makeImage({ prompt: 'space warrior' }),
+    );
+
+    const result = await getAvatarById(id, TEST_USER_ID);
+
+    expect(result?.prompt).toBe('space warrior');
+    expect(result?.extension).toBe('png');
+  });
+
+  it('returns adjustments and preset when stored on the document', async () => {
+    const adjustments = { brightness: 0.5, contrast: 0.2 };
+    const id = await addImageToLibrary(
+      TEST_USER_ID,
+      makeImage({ adjustments, preset: 'grayscale' }),
+    );
+
+    const result = await getAvatarById(id, TEST_USER_ID);
+
+    expect(result?.adjustments).toEqual(adjustments);
+    expect(result?.preset).toBe('grayscale');
+  });
+
+  it('returns undefined for a document belonging to a different user', async () => {
+    const id = await addImageToLibrary(TEST_USER_ID, makeImage());
+
+    const result = await getAvatarById(id, 'other-user-id');
+
+    expect(result).toBeUndefined();
   });
 });
