@@ -1,3 +1,5 @@
+import type { PresetType } from '@/modules/avatars/types.js';
+
 export type Album = {
   id: string;
   userId: string;
@@ -20,4 +22,6 @@ export type AlbumAvatar = {
   prompt: string;
   extension: string;
   createdAt: string;
+  adjustments?: Record<string, number>;
+  preset?: PresetType;
 };

@@ -21,6 +21,12 @@ const mockGetGeneratedAvatars = vi.hoisted(() =>
 const mockGeneratorGetStream = vi.hoisted(() =>
   vi.fn<(...args: unknown[]) => Promise<unknown>>(),
 );
+const mockUploadEditedAvatar = vi.hoisted(() =>
+  vi.fn<(...args: unknown[]) => Promise<unknown>>(),
+);
+const mockAddUploadedAvatarToAlbum = vi.hoisted(() =>
+  vi.fn<(...args: unknown[]) => Promise<unknown>>(),
+);
 
 vi.mock('./service/avatar-public.service.js', () => ({
   getAllPublicCatalog: mockGetAllPublicCatalog,
@@ -31,6 +37,11 @@ vi.mock('./service/avatar-generator.service.js', () => ({
   generateImages: mockGenerateImages,
   getGeneratedAvatars: mockGetGeneratedAvatars,
   getAvatarStream: mockGeneratorGetStream,
+  uploadEditedAvatar: mockUploadEditedAvatar,
+}));
+
+vi.mock('@/modules/albums/service/albums.service.js', () => ({
+  addUploadedAvatarToAlbum: mockAddUploadedAvatarToAlbum,
 }));
 
 // ── auth middleware mock ───────────────────────────────────────────────────
@@ -232,5 +243,149 @@ describe('GET /api/avatars/download-from-library/:filename', () => {
       'my-avatar.png',
     );
     expect(res.headers['content-disposition']).toContain('my-avatar.png');
+  });
+});
+
+describe('POST /api/avatars/save-edited', () => {
+  const FAKE_AVATAR_RESULT = {
+    avatar: {
+      avatarId: 'new-doc-id',
+      url: 'https://storage.example.com/edited.png',
+      prompt: 'anime ninja',
+      extension: 'png',
+    },
+    remainingCredits: 3,
+  };
+
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockUploadEditedAvatar.mockResolvedValue(FAKE_AVATAR_RESULT);
+    mockAddUploadedAvatarToAlbum.mockResolvedValue({});
+  });
+
+  it('responds 401 when no user is authenticated', async () => {
+    const res = await request(app)
+      .post('/api/avatars/save-edited')
+      .attach('file', Buffer.from('img'), 'edited.png')
+      .field('avatarId', 'src-avatar-id');
+
+    expect(res.status).toBe(HttpStatusCode.UNAUTHORIZED);
+  });
+
+  it('responds 400 when no file is attached', async () => {
+    const res = await request(app)
+      .post('/api/avatars/save-edited')
+      .set(AUTH)
+      .field('avatarId', 'src-avatar-id');
+
+    expect(res.status).toBe(HttpStatusCode.BAD_REQUEST);
+  });
+
+  it('responds 400 when avatarId is missing', async () => {
+    const res = await request(app)
+      .post('/api/avatars/save-edited')
+      .set(AUTH)
+      .attach('file', Buffer.from('img'), 'edited.png');
+
+    expect(res.status).toBe(HttpStatusCode.BAD_REQUEST);
+  });
+
+  it('responds 201 with avatar and remainingCredits on success', async () => {
+    const res = await request(app)
+      .post('/api/avatars/save-edited')
+      .set(AUTH)
+      .attach('file', Buffer.from('img'), 'edited.png')
+      .field('avatarId', 'src-avatar-id');
+
+    expect(res.status).toBe(HttpStatusCode.CREATED);
+    expect(res.body).toEqual({
+      success: true,
+      data: { avatar: FAKE_AVATAR_RESULT.avatar, remainingCredits: 3 },
+    });
+  });
+
+  it('passes parsed adjustments and preset to the service', async () => {
+    const adjustments = { brightness: 0.79, contrast: 0 };
+
+    await request(app)
+      .post('/api/avatars/save-edited')
+      .set(AUTH)
+      .attach('file', Buffer.from('img'), 'edited.png')
+      .field('avatarId', 'src-avatar-id')
+      .field('adjustments', JSON.stringify(adjustments))
+      .field('preset', 'invert');
+
+    expect(mockUploadEditedAvatar).toHaveBeenCalledWith(
+      TestFactory.CONTROLLER_UID,
+      'src-avatar-id',
+      expect.any(Object),
+      adjustments,
+      'invert',
+    );
+  });
+
+  it('treats the string "undefined" for albumId as absent', async () => {
+    await request(app)
+      .post('/api/avatars/save-edited')
+      .set(AUTH)
+      .attach('file', Buffer.from('img'), 'edited.png')
+      .field('avatarId', 'src-avatar-id')
+      .field('albumId', 'undefined');
+
+    expect(mockAddUploadedAvatarToAlbum).not.toHaveBeenCalled();
+  });
+
+  it('treats the string "undefined" for preset as absent', async () => {
+    await request(app)
+      .post('/api/avatars/save-edited')
+      .set(AUTH)
+      .attach('file', Buffer.from('img'), 'edited.png')
+      .field('avatarId', 'src-avatar-id')
+      .field('preset', 'undefined');
+
+    expect(mockUploadEditedAvatar).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.any(String),
+      expect.any(Object),
+      undefined,
+      undefined,
+    );
+  });
+
+  it('calls addUploadedAvatarToAlbum when a valid albumId is provided', async () => {
+    await request(app)
+      .post('/api/avatars/save-edited')
+      .set(AUTH)
+      .attach('file', Buffer.from('img'), 'edited.png')
+      .field('avatarId', 'src-avatar-id')
+      .field('albumId', 'album-xyz');
+
+    expect(mockAddUploadedAvatarToAlbum).toHaveBeenCalledWith(
+      'album-xyz',
+      TestFactory.CONTROLLER_UID,
+      FAKE_AVATAR_RESULT.avatar,
+    );
+  });
+
+  it('does NOT call addUploadedAvatarToAlbum when albumId is absent', async () => {
+    await request(app)
+      .post('/api/avatars/save-edited')
+      .set(AUTH)
+      .attach('file', Buffer.from('img'), 'edited.png')
+      .field('avatarId', 'src-avatar-id');
+
+    expect(mockAddUploadedAvatarToAlbum).not.toHaveBeenCalled();
+  });
+
+  it('responds 500 when the service throws', async () => {
+    mockUploadEditedAvatar.mockRejectedValue(new Error('Storage error'));
+
+    const res = await request(app)
+      .post('/api/avatars/save-edited')
+      .set(AUTH)
+      .attach('file', Buffer.from('img'), 'edited.png')
+      .field('avatarId', 'src-avatar-id');
+
+    expect(res.status).toBe(HttpStatusCode.INTERNAL_SERVER_ERROR);
   });
 });

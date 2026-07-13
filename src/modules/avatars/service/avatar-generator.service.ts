@@ -1,12 +1,16 @@
 import { FieldValue } from 'firebase-admin/firestore';
 import { v4 as uuidv4 } from 'uuid';
 
-import { InternalServerError } from '@/utils/errors/ApiErrors.js';
+import {
+  InternalServerError,
+  NotFoundError,
+} from '@/utils/errors/ApiErrors.js';
 import { imagenAPI } from '../providers/imagen.provider.js';
 import * as avatarRepo from '../avatars.repository.js';
 import * as avatarSharedService from './avatar-shared.service.js';
 import * as userService from '@/modules/users/service/user.service.js';
 import config from '@/config/config.js';
+import type { PresetType } from '../types.js';
 
 export const STYLE_TEMPLATES = {
   none: ['- Sharp focus'].join('\n'),
@@ -112,6 +116,60 @@ export const getGeneratedAvatars = async (userId: string) => {
 export const getAvatarStream = (userId: string, fileName: string) => {
   const filePath = `users/${userId}/generated-avatars/${fileName}`;
   return avatarSharedService.getAvatarStream(fileName, filePath);
+};
+
+export const uploadEditedAvatar = async (
+  userId: string,
+  avatarId: string,
+  file: Express.Multer.File,
+  adjustments?: Record<string, number>,
+  preset?: PresetType,
+) => {
+  const avatar = await avatarRepo.getAvatarById(avatarId, userId);
+  if (avatar === undefined) {
+    throw new NotFoundError(`avatar not found with id: ${avatarId}`);
+  }
+
+  const remainingCredits = await userService.deductCredits(userId, 1);
+
+  try {
+    const downloadToken = uuidv4();
+    const name = `image-${Date.now()}-edited`;
+    const storagePath = `users/${userId}/generated-avatars/${name}.${avatar.extension}`;
+    await avatarRepo.uploadImage(storagePath, file, downloadToken);
+
+    const url = avatarRepo.getPermanentUrl(
+      config.firebaseStorageBucket,
+      encodeURIComponent(storagePath),
+      downloadToken,
+    );
+
+    const imageDoc = {
+      url,
+      storagePath,
+      extension: avatar.extension,
+      prompt: avatar.prompt,
+      createdAt: FieldValue.serverTimestamp(),
+      ...(adjustments !== undefined && { adjustments }),
+      ...(preset !== undefined && { preset }),
+    };
+    const newAvatarId = await avatarRepo.addImageToLibrary(userId, imageDoc);
+
+    return {
+      avatar: {
+        avatarId: newAvatarId,
+        url,
+        prompt: avatar.prompt,
+        extension: avatar.extension,
+        ...(adjustments !== undefined && { adjustments }),
+        ...(preset !== undefined && { preset }),
+      },
+      remainingCredits,
+    };
+  } catch (error) {
+    await userService.addCredits(userId, 1);
+    throw error;
+  }
 };
 
 function buildAvatarPrompt(userInput: string, style?: StyleTemplate) {

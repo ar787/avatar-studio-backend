@@ -6,7 +6,6 @@ import {
 import type { GeneratedImage } from './types.ts';
 
 export const generatedImageConverter: FirestoreDataConverter<GeneratedImage> = {
-  // Logic to prepare data for storage in Firestore
   toFirestore(image: GeneratedImage): FirebaseFirestore.DocumentData {
     return {
       url: image.url,
@@ -14,10 +13,13 @@ export const generatedImageConverter: FirestoreDataConverter<GeneratedImage> = {
       extension: image.extension,
       storagePath: image.storagePath,
       createdAt: image.createdAt || FieldValue.serverTimestamp(),
+      ...(image.adjustments !== undefined && {
+        adjustments: image.adjustments,
+      }),
+      ...(image.preset !== undefined && { preset: image.preset }),
     };
   },
 
-  // Logic to transform data coming out of Firestore
   fromFirestore(snapshot: QueryDocumentSnapshot): GeneratedImage {
     const data = snapshot.data();
     return {
@@ -25,8 +27,9 @@ export const generatedImageConverter: FirestoreDataConverter<GeneratedImage> = {
       prompt: data.prompt,
       extension: data.extension,
       storagePath: data.storagePath,
-      // Automatically convert Firestore Timestamp to JS Date
       createdAt: data.createdAt?.toDate() || new Date(),
+      ...(data.adjustments !== undefined && { adjustments: data.adjustments }),
+      ...(data.preset !== undefined && { preset: data.preset }),
     };
   },
 };

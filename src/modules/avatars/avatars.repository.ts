@@ -62,3 +62,31 @@ export const getPermanentUrl = (
 ) => {
   return `${config.storageBaseUrl}/${bucketName}/o/${encodedPath}?alt=media&token=${downloadToken}`;
 };
+
+export const uploadImage = async (
+  storagePath: string,
+  file: Express.Multer.File,
+  downloadToken: string,
+) => {
+  const fileUpload = bucket.file(storagePath);
+
+  await fileUpload.save(file.buffer, {
+    metadata: {
+      contentType: file.mimetype,
+      metadata: {
+        firebaseStorageDownloadTokens: downloadToken,
+      },
+    },
+  });
+};
+
+export const getAvatarById = async (avatarId: string, userId: string) => {
+  const res = await db
+    .collection('users')
+    .doc(userId)
+    .collection('generated-images')
+    .doc(avatarId)
+    .withConverter(generatedImageConverter)
+    .get();
+  return res.data();
+};
