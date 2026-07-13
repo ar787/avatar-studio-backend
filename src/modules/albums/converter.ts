@@ -40,6 +40,10 @@ export const albumAvatarConverter: FirestoreDataConverter<AlbumAvatar> = {
       prompt: albumAvatar.prompt,
       extension: albumAvatar.extension,
       createdAt: albumAvatar.createdAt,
+      ...(albumAvatar.adjustments !== undefined && {
+        adjustments: albumAvatar.adjustments,
+      }),
+      ...(albumAvatar.preset !== undefined && { preset: albumAvatar.preset }),
     };
   },
   fromFirestore(snapshot: QueryDocumentSnapshot): AlbumAvatar {
@@ -51,6 +55,8 @@ export const albumAvatarConverter: FirestoreDataConverter<AlbumAvatar> = {
       prompt: data.prompt,
       extension: data.extension,
       createdAt: data.createdAt,
+      ...(data.adjustments !== undefined && { adjustments: data.adjustments }),
+      ...(data.preset !== undefined && { preset: data.preset }),
     };
   },
 };

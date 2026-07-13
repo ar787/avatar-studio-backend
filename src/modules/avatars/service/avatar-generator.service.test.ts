@@ -22,6 +22,12 @@ const mockAddCredits = vi.hoisted(() =>
 const mockSharedGetStream = vi.hoisted(() =>
   vi.fn<(...args: unknown[]) => Promise<unknown>>(),
 );
+const mockGetAvatarById = vi.hoisted(() =>
+  vi.fn<(...args: unknown[]) => Promise<unknown>>(),
+);
+const mockUploadImage = vi.hoisted(() =>
+  vi.fn<(...args: unknown[]) => Promise<void>>(),
+);
 
 vi.mock('../providers/imagen.provider.js', () => ({
   imagenAPI: mockImagenAPI,
@@ -32,6 +38,8 @@ vi.mock('../avatars.repository.js', () => ({
   addImageToLibrary: mockAddImageToLibrary,
   getPermanentUrl: mockGetPermanentUrl,
   fetchGeneratedAvatars: mockFetchGeneratedAvatars,
+  getAvatarById: mockGetAvatarById,
+  uploadImage: mockUploadImage,
 }));
 
 vi.mock('@/modules/users/service/user.service.js', () => ({
@@ -47,9 +55,13 @@ import {
   generateImages,
   getGeneratedAvatars,
   getAvatarStream,
+  uploadEditedAvatar,
   STYLE_TEMPLATES,
 } from './avatar-generator.service.js';
-import { InternalServerError } from '@/utils/errors/ApiErrors.js';
+import {
+  InternalServerError,
+  NotFoundError,
+} from '@/utils/errors/ApiErrors.js';
 
 const mockFile = {
   save: vi.fn<(...args: unknown[]) => Promise<void>>(),
@@ -196,5 +208,148 @@ describe('generateImages — style templates', () => {
     expect(mockImagenAPI).toHaveBeenCalledWith(
       expect.stringContaining(STYLE_TEMPLATES.none),
     );
+  });
+});
+
+const FAKE_ORIGINAL_AVATAR = {
+  url: 'https://storage.example.com/original.png',
+  prompt: 'anime ninja',
+  storagePath: 'users/user-123/generated-avatars/original.png',
+  extension: 'png' as const,
+  createdAt: new Date(),
+};
+
+const FAKE_FILE = {
+  buffer: Buffer.from('fake-edited-image'),
+  mimetype: 'image/png',
+  originalname: 'edited.png',
+} as Express.Multer.File;
+
+describe('uploadEditedAvatar', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    mockGetAvatarById.mockResolvedValue(FAKE_ORIGINAL_AVATAR);
+    mockUploadImage.mockResolvedValue(undefined);
+    mockGetPermanentUrl.mockReturnValue(
+      'https://storage.example.com/edited.png',
+    );
+    mockAddImageToLibrary.mockResolvedValue('new-avatar-doc-id');
+    mockDeductCredits.mockResolvedValue(4);
+  });
+
+  it('throws NotFoundError when the original avatar does not exist', async () => {
+    mockGetAvatarById.mockResolvedValue(undefined);
+
+    await expect(
+      uploadEditedAvatar('user-123', 'bad-id', FAKE_FILE),
+    ).rejects.toThrow(NotFoundError);
+
+    expect(mockDeductCredits).not.toHaveBeenCalled();
+  });
+
+  it('deducts 1 credit after validating the avatar', async () => {
+    await uploadEditedAvatar('user-123', 'avatar-abc', FAKE_FILE);
+
+    expect(mockGetAvatarById).toHaveBeenCalledWith('avatar-abc', 'user-123');
+    expect(mockDeductCredits).toHaveBeenCalledWith('user-123', 1);
+  });
+
+  it('uploads the file and saves the doc with correct base fields', async () => {
+    await uploadEditedAvatar('user-123', 'avatar-abc', FAKE_FILE);
+
+    expect(mockUploadImage).toHaveBeenCalledWith(
+      expect.stringContaining('users/user-123/generated-avatars/'),
+      FAKE_FILE,
+      expect.any(String),
+    );
+    expect(mockAddImageToLibrary).toHaveBeenCalledWith(
+      'user-123',
+      expect.objectContaining({
+        prompt: 'anime ninja',
+        extension: 'png',
+        url: 'https://storage.example.com/edited.png',
+      }),
+    );
+  });
+
+  it('includes adjustments and preset in the saved doc when provided', async () => {
+    const adjustments = { brightness: 0.79, contrast: 0 };
+
+    await uploadEditedAvatar(
+      'user-123',
+      'avatar-abc',
+      FAKE_FILE,
+      adjustments,
+      'invert',
+    );
+
+    expect(mockAddImageToLibrary).toHaveBeenCalledWith(
+      'user-123',
+      expect.objectContaining({ adjustments, preset: 'invert' }),
+    );
+  });
+
+  it('omits adjustments and preset from the saved doc when not provided', async () => {
+    await uploadEditedAvatar('user-123', 'avatar-abc', FAKE_FILE);
+
+    expect(mockAddImageToLibrary).toHaveBeenCalledWith(
+      'user-123',
+      expect.not.objectContaining({
+        adjustments: expect.anything(),
+        preset: expect.anything(),
+      }),
+    );
+  });
+
+  it('returns avatarId, url, prompt, extension and remainingCredits', async () => {
+    const result = await uploadEditedAvatar(
+      'user-123',
+      'avatar-abc',
+      FAKE_FILE,
+    );
+
+    expect(result).toEqual({
+      avatar: expect.objectContaining({
+        avatarId: 'new-avatar-doc-id',
+        url: 'https://storage.example.com/edited.png',
+        prompt: 'anime ninja',
+        extension: 'png',
+      }),
+      remainingCredits: 4,
+    });
+  });
+
+  it('includes adjustments and preset in the return value when provided', async () => {
+    const adjustments = { brightness: 0.5 };
+
+    const result = await uploadEditedAvatar(
+      'user-123',
+      'avatar-abc',
+      FAKE_FILE,
+      adjustments,
+      'grayscale',
+    );
+
+    expect(result.avatar).toMatchObject({ adjustments, preset: 'grayscale' });
+  });
+
+  it('refunds 1 credit when the upload fails', async () => {
+    mockUploadImage.mockRejectedValue(new Error('Storage unavailable'));
+
+    await expect(
+      uploadEditedAvatar('user-123', 'avatar-abc', FAKE_FILE),
+    ).rejects.toThrow('Storage unavailable');
+
+    expect(mockAddCredits).toHaveBeenCalledWith('user-123', 1);
+  });
+
+  it('does NOT refund when deductCredits itself fails', async () => {
+    mockDeductCredits.mockRejectedValue(new Error('Insufficient credits.'));
+
+    await expect(
+      uploadEditedAvatar('user-123', 'avatar-abc', FAKE_FILE),
+    ).rejects.toThrow('Insufficient credits.');
+
+    expect(mockAddCredits).not.toHaveBeenCalled();
   });
 });
