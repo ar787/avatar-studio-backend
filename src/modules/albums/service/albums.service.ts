@@ -143,6 +143,8 @@ export const addToAlbum = async (
     url: avatar.url,
     prompt: avatar.prompt,
     extension: avatar.extension,
+    adjustments: avatar.adjustments,
+    preset: avatar.preset,
     createdAt,
   });
 

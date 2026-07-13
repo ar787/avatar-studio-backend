@@ -22,6 +22,6 @@ export type AlbumAvatar = {
   prompt: string;
   extension: string;
   createdAt: string;
-  adjustments?: Record<string, number>;
-  preset?: PresetType;
+  adjustments?: Record<string, number> | undefined;
+  preset?: PresetType | undefined;
 };
