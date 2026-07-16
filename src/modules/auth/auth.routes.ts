@@ -4,10 +4,6 @@ import { verifyAuthTokenHandler } from '@/middlewares/verifyAuthToken.middleware
 
 const router = Router();
 
-router.post(
-  '/createUserDocument',
-  verifyAuthTokenHandler,
-  authController.createUserDocument,
-);
+router.post('/', verifyAuthTokenHandler, authController.createUserDocument);
 
 export default router;

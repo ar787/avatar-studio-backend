@@ -56,8 +56,8 @@ import {
   getGeneratedAvatars,
   getAvatarStream,
   uploadEditedAvatar,
-  STYLE_TEMPLATES,
 } from './avatar-generator.service.js';
+import { STYLE_TEMPLATES } from '../avatars.utils.js';
 import {
   InternalServerError,
   NotFoundError,

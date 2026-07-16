@@ -8,8 +8,9 @@ import {
 } from '@/utils/errors/ApiErrors.js';
 import { HttpStatusCode } from '@/utils/httpStatusCodes.js';
 import type { PresetType } from './types.js';
+import { parseAdjustments, VALID_PRESETS } from './avatars.utils.js';
 
-export const getAllPublicAvatarsController = async (
+export const getAllPublicAvatars = async (
   _: Request,
   res: Response,
   next: NextFunction,
@@ -25,7 +26,7 @@ export const getAllPublicAvatarsController = async (
   }
 };
 
-export const getGeneratedAvatarsController = async (
+export const getGeneratedAvatars = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -33,7 +34,7 @@ export const getGeneratedAvatarsController = async (
   try {
     const user = req.user;
     if (!user) {
-      return next(new UnauthorizedError('User not authorized'));
+      throw new UnauthorizedError('User not authorized');
     }
     const generatedAvatars = await avatarGeneratorService.getGeneratedAvatars(
       user.uid,
@@ -59,8 +60,7 @@ export const downloadAvatarFromLibrary = async (
     }
     const userId = req.user?.uid;
     if (!userId) {
-      next(new UnauthorizedError('User not authorized'));
-      return;
+      throw new UnauthorizedError('User not authorized');
     }
     const stream = await avatarGeneratorService.getAvatarStream(
       userId,
@@ -98,7 +98,7 @@ export const downloadAvatar = async (
   }
 };
 
-export const generatedImagesController = async (
+export const generatedImages = async (
   req: Request,
   res: Response,
   next: NextFunction,
@@ -107,6 +107,9 @@ export const generatedImagesController = async (
     const user = req.user;
     if (!user) {
       return next(new UnauthorizedError('Unauthorized user'));
+    }
+    if (!req.body.prompt?.trim()) {
+      throw new BadRequestError('prompt is required');
     }
     const result = await avatarGeneratorService.generateImages(
       req.body.prompt,
@@ -133,11 +136,13 @@ export const saveEditedAvatar = async (
         ? req.body.albumId
         : undefined;
     const preset: PresetType | undefined =
-      req.body.preset && req.body.preset !== 'undefined'
-        ? req.body.preset
+      req.body.preset &&
+      req.body.preset !== 'undefined' &&
+      VALID_PRESETS.has(req.body.preset)
+        ? (req.body.preset as PresetType)
         : undefined;
     const adjustments: Record<string, number> | undefined = req.body.adjustments
-      ? JSON.parse(req.body.adjustments)
+      ? parseAdjustments(req.body.adjustments)
       : undefined;
 
     if (!userId) {
