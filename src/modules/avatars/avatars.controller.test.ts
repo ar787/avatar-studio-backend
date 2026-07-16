@@ -75,14 +75,14 @@ import { errorHandler } from '@/middlewares/error.middleware.js';
 // ── test app ───────────────────────────────────────────────────────────────
 const app = express();
 app.use(express.json());
-app.use('/api/avatars', avatarRouter);
+app.use('/api/v1/avatars', avatarRouter);
 app.use(errorHandler);
 
 const AUTH = TestFactory.AUTH_HEADER;
 
 // ── tests ──────────────────────────────────────────────────────────────────
 
-describe('GET /api/avatars', () => {
+describe('GET /api/v1/avatars', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -91,7 +91,7 @@ describe('GET /api/avatars', () => {
     const fakeAvatars = [{ name: 'a.png' }, { name: 'b.png' }];
     mockGetAllPublicCatalog.mockResolvedValue(fakeAvatars);
 
-    const res = await request(app).get('/api/avatars');
+    const res = await request(app).get('/api/v1/avatars');
 
     expect(res.status).toBe(HttpStatusCode.OK);
     expect(res.body).toEqual({ success: true, data: fakeAvatars });
@@ -100,19 +100,19 @@ describe('GET /api/avatars', () => {
   it('responds 500 when the service throws', async () => {
     mockGetAllPublicCatalog.mockRejectedValue(new Error('Firestore down'));
 
-    const res = await request(app).get('/api/avatars');
+    const res = await request(app).get('/api/v1/avatars');
 
     expect(res.status).toBe(HttpStatusCode.INTERNAL_SERVER_ERROR);
   });
 });
 
-describe('GET /api/avatars/generated-avatars', () => {
+describe('GET /api/v1/avatars/library', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('responds 401 when no user is authenticated', async () => {
-    const res = await request(app).get('/api/avatars/generated-avatars');
+    const res = await request(app).get('/api/v1/avatars/library');
 
     expect(res.status).toBe(HttpStatusCode.UNAUTHORIZED);
   });
@@ -121,9 +121,7 @@ describe('GET /api/avatars/generated-avatars', () => {
     const fakeAvatars = [{ id: '1' }];
     mockGetGeneratedAvatars.mockResolvedValue(fakeAvatars);
 
-    const res = await request(app)
-      .get('/api/avatars/generated-avatars')
-      .set(AUTH);
+    const res = await request(app).get('/api/v1/avatars/library').set(AUTH);
 
     expect(res.status).toBe(HttpStatusCode.OK);
     expect(res.body).toEqual({ success: true, data: fakeAvatars });
@@ -133,14 +131,14 @@ describe('GET /api/avatars/generated-avatars', () => {
   });
 });
 
-describe('POST /api/avatars/generate', () => {
+describe('POST /api/v1/avatars', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('responds 401 when no user is authenticated', async () => {
     const res = await request(app)
-      .post('/api/avatars/generate')
+      .post('/api/v1/avatars')
       .send({ prompt: 'a cat' });
 
     expect(res.status).toBe(HttpStatusCode.UNAUTHORIZED);
@@ -155,7 +153,7 @@ describe('POST /api/avatars/generate', () => {
     mockGenerateImages.mockResolvedValue(fakeResult);
 
     const res = await request(app)
-      .post('/api/avatars/generate')
+      .post('/api/v1/avatars')
       .set(AUTH)
       .send({ prompt: 'a robot' });
 
@@ -176,7 +174,7 @@ describe('POST /api/avatars/generate', () => {
     });
 
     await request(app)
-      .post('/api/avatars/generate')
+      .post('/api/v1/avatars')
       .set(AUTH)
       .send({ prompt: 'a wizard', style: 'anime' });
 
@@ -191,7 +189,7 @@ describe('POST /api/avatars/generate', () => {
     mockGenerateImages.mockRejectedValue(new Error('unexpected failure'));
 
     const res = await request(app)
-      .post('/api/avatars/generate')
+      .post('/api/v1/avatars')
       .set(AUTH)
       .send({ prompt: 'a cat' });
 
@@ -199,7 +197,7 @@ describe('POST /api/avatars/generate', () => {
   });
 });
 
-describe('GET /api/avatars/download/:filename', () => {
+describe('GET /api/v1/avatars/:filename/download', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
@@ -208,7 +206,7 @@ describe('GET /api/avatars/download/:filename', () => {
     const fakeStream = Readable.from(Buffer.from('fake-image-bytes'));
     mockGetCatalogStream.mockResolvedValue(fakeStream);
 
-    const res = await request(app).get('/api/avatars/download/avatar.png');
+    const res = await request(app).get('/api/v1/avatars/avatar.png/download');
 
     expect(res.status).toBe(HttpStatusCode.OK);
     expect(mockGetCatalogStream).toHaveBeenCalledWith('avatar.png');
@@ -216,14 +214,14 @@ describe('GET /api/avatars/download/:filename', () => {
   });
 });
 
-describe('GET /api/avatars/download-from-library/:filename', () => {
+describe('GET /api/v1/avatars/library/:filename/download', () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
 
   it('responds 401 when no user is authenticated', async () => {
     const res = await request(app).get(
-      '/api/avatars/download-from-library/my-avatar.png',
+      '/api/v1/avatars/library/my-avatar.png/download',
     );
 
     expect(res.status).toBe(HttpStatusCode.UNAUTHORIZED);
@@ -234,7 +232,7 @@ describe('GET /api/avatars/download-from-library/:filename', () => {
     mockGeneratorGetStream.mockResolvedValue(fakeStream);
 
     const res = await request(app)
-      .get('/api/avatars/download-from-library/my-avatar.png')
+      .get('/api/v1/avatars/library/my-avatar.png/download')
       .set(AUTH);
 
     expect(res.status).toBe(HttpStatusCode.OK);
@@ -246,7 +244,7 @@ describe('GET /api/avatars/download-from-library/:filename', () => {
   });
 });
 
-describe('POST /api/avatars/save-edited', () => {
+describe('POST /api/v1/avatars/save-edited', () => {
   const FAKE_AVATAR_RESULT = {
     avatar: {
       avatarId: 'new-doc-id',
@@ -265,7 +263,7 @@ describe('POST /api/avatars/save-edited', () => {
 
   it('responds 401 when no user is authenticated', async () => {
     const res = await request(app)
-      .post('/api/avatars/save-edited')
+      .post('/api/v1/avatars/save-edited')
       .attach('file', Buffer.from('img'), 'edited.png')
       .field('avatarId', 'src-avatar-id');
 
@@ -274,7 +272,7 @@ describe('POST /api/avatars/save-edited', () => {
 
   it('responds 400 when no file is attached', async () => {
     const res = await request(app)
-      .post('/api/avatars/save-edited')
+      .post('/api/v1/avatars/save-edited')
       .set(AUTH)
       .field('avatarId', 'src-avatar-id');
 
@@ -283,7 +281,7 @@ describe('POST /api/avatars/save-edited', () => {
 
   it('responds 400 when avatarId is missing', async () => {
     const res = await request(app)
-      .post('/api/avatars/save-edited')
+      .post('/api/v1/avatars/save-edited')
       .set(AUTH)
       .attach('file', Buffer.from('img'), 'edited.png');
 
@@ -292,7 +290,7 @@ describe('POST /api/avatars/save-edited', () => {
 
   it('responds 201 with avatar and remainingCredits on success', async () => {
     const res = await request(app)
-      .post('/api/avatars/save-edited')
+      .post('/api/v1/avatars/save-edited')
       .set(AUTH)
       .attach('file', Buffer.from('img'), 'edited.png')
       .field('avatarId', 'src-avatar-id');
@@ -308,7 +306,7 @@ describe('POST /api/avatars/save-edited', () => {
     const adjustments = { brightness: 0.79, contrast: 0 };
 
     await request(app)
-      .post('/api/avatars/save-edited')
+      .post('/api/v1/avatars/save-edited')
       .set(AUTH)
       .attach('file', Buffer.from('img'), 'edited.png')
       .field('avatarId', 'src-avatar-id')
@@ -326,7 +324,7 @@ describe('POST /api/avatars/save-edited', () => {
 
   it('treats the string "undefined" for albumId as absent', async () => {
     await request(app)
-      .post('/api/avatars/save-edited')
+      .post('/api/v1/avatars/save-edited')
       .set(AUTH)
       .attach('file', Buffer.from('img'), 'edited.png')
       .field('avatarId', 'src-avatar-id')
@@ -337,7 +335,7 @@ describe('POST /api/avatars/save-edited', () => {
 
   it('treats the string "undefined" for preset as absent', async () => {
     await request(app)
-      .post('/api/avatars/save-edited')
+      .post('/api/v1/avatars/save-edited')
       .set(AUTH)
       .attach('file', Buffer.from('img'), 'edited.png')
       .field('avatarId', 'src-avatar-id')
@@ -354,7 +352,7 @@ describe('POST /api/avatars/save-edited', () => {
 
   it('calls addUploadedAvatarToAlbum when a valid albumId is provided', async () => {
     await request(app)
-      .post('/api/avatars/save-edited')
+      .post('/api/v1/avatars/save-edited')
       .set(AUTH)
       .attach('file', Buffer.from('img'), 'edited.png')
       .field('avatarId', 'src-avatar-id')
@@ -369,7 +367,7 @@ describe('POST /api/avatars/save-edited', () => {
 
   it('does NOT call addUploadedAvatarToAlbum when albumId is absent', async () => {
     await request(app)
-      .post('/api/avatars/save-edited')
+      .post('/api/v1/avatars/save-edited')
       .set(AUTH)
       .attach('file', Buffer.from('img'), 'edited.png')
       .field('avatarId', 'src-avatar-id');
@@ -381,7 +379,7 @@ describe('POST /api/avatars/save-edited', () => {
     mockUploadEditedAvatar.mockRejectedValue(new Error('Storage error'));
 
     const res = await request(app)
-      .post('/api/avatars/save-edited')
+      .post('/api/v1/avatars/save-edited')
       .set(AUTH)
       .attach('file', Buffer.from('img'), 'edited.png')
       .field('avatarId', 'src-avatar-id');

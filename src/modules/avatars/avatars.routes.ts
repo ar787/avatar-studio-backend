@@ -3,30 +3,22 @@ import multer from 'multer';
 import * as avatarController from './avatars.controller.js';
 import { verifyAuthTokenHandler } from '@/middlewares/verifyAuthToken.middleware.js';
 const router = Router();
-const upload = multer();
-router.get('/', avatarController.getAllPublicAvatarsController);
-router.get('/download/:filename', avatarController.downloadAvatar);
-// Deprecated
-router.get(
-  '/generated-avatars',
-  verifyAuthTokenHandler,
-  avatarController.getGeneratedAvatarsController,
-);
-router.post(
-  '/generate',
-  verifyAuthTokenHandler,
-  avatarController.generatedImagesController,
-);
+const upload = multer({ limits: { fileSize: 3 * 1024 * 1024 } });
+router.get('/', avatarController.getAllPublicAvatars);
+
+router.use(verifyAuthTokenHandler);
+router.post('/', avatarController.generatedImages);
+
+router.get('/library', avatarController.getGeneratedAvatars);
 
 router.get(
-  '/download-from-library/:filename',
-  verifyAuthTokenHandler,
+  '/library/:filename/download',
   avatarController.downloadAvatarFromLibrary,
 );
+router.get('/:filename/download', avatarController.downloadAvatar);
 
 router.post(
   '/save-edited',
-  verifyAuthTokenHandler,
   upload.single('file'),
   avatarController.saveEditedAvatar,
 );

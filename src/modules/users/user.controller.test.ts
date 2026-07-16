@@ -33,18 +33,18 @@ import { errorHandler } from '@/middlewares/error.middleware.js';
 
 const app = express();
 app.use(express.json());
-app.use('/api/users', userRouter);
+app.use('/api/v1/users', userRouter);
 app.use(errorHandler);
 
 const AUTH = TestFactory.AUTH_HEADER;
 
 // ── GET /getUserProfile ────────────────────────────────────────────────────
 
-describe('GET /api/users/getUserProfile', () => {
+describe('GET /api/v1/users/profile', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('responds 401 when no user is authenticated', async () => {
-    const res = await request(app).get('/api/users/getUserProfile');
+    const res = await request(app).get('/api/v1/users/profile');
 
     expect(res.status).toBe(HttpStatusCode.UNAUTHORIZED);
   });
@@ -53,7 +53,7 @@ describe('GET /api/users/getUserProfile', () => {
     const fakeProfile = { displayName: 'Alice', credits: 5, isPremium: false };
     mockGetUserProfile.mockResolvedValue(fakeProfile);
 
-    const res = await request(app).get('/api/users/getUserProfile').set(AUTH);
+    const res = await request(app).get('/api/v1/users/profile').set(AUTH);
 
     expect(res.status).toBe(HttpStatusCode.OK);
     expect(res.body).toEqual({ success: true, data: fakeProfile });
@@ -66,7 +66,7 @@ describe('GET /api/users/getUserProfile', () => {
       new NotFoundError('User profile not found in database'),
     );
 
-    const res = await request(app).get('/api/users/getUserProfile').set(AUTH);
+    const res = await request(app).get('/api/v1/users/profile').set(AUTH);
 
     expect(res.status).toBe(HttpStatusCode.NOT_FOUND);
   });
@@ -74,7 +74,7 @@ describe('GET /api/users/getUserProfile', () => {
   it('responds 500 when the service throws an unexpected error', async () => {
     mockGetUserProfile.mockRejectedValue(new Error('database crash'));
 
-    const res = await request(app).get('/api/users/getUserProfile').set(AUTH);
+    const res = await request(app).get('/api/v1/users/profile').set(AUTH);
 
     expect(res.status).toBe(HttpStatusCode.INTERNAL_SERVER_ERROR);
   });
@@ -82,12 +82,12 @@ describe('GET /api/users/getUserProfile', () => {
 
 // ── PATCH /updateProfile ───────────────────────────────────────────────────
 
-describe('PATCH /api/users/updateProfile', () => {
+describe('PATCH /api/v1/users/profile', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('responds 401 when no user is authenticated', async () => {
     const res = await request(app)
-      .patch('/api/users/updateProfile')
+      .patch('/api/v1/users/profile')
       .send({ displayName: 'New Name' });
 
     expect(res.status).toBe(HttpStatusCode.UNAUTHORIZED);
@@ -97,7 +97,7 @@ describe('PATCH /api/users/updateProfile', () => {
     mockRenameUser.mockResolvedValue(undefined);
 
     const res = await request(app)
-      .patch('/api/users/updateProfile')
+      .patch('/api/v1/users/profile')
       .set(AUTH)
       .send({ displayName: 'New Name' });
 
@@ -116,7 +116,7 @@ describe('PATCH /api/users/updateProfile', () => {
     mockRenameUser.mockRejectedValue(new Error('write failed'));
 
     const res = await request(app)
-      .patch('/api/users/updateProfile')
+      .patch('/api/v1/users/profile')
       .set(AUTH)
       .send({ displayName: 'New Name' });
 
@@ -126,12 +126,12 @@ describe('PATCH /api/users/updateProfile', () => {
 
 // ── PATCH /profile/image ───────────────────────────────────────────────────
 
-describe('PATCH /api/users/profile/image', () => {
+describe('PATCH /api/v1/users/profile/image', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('responds 401 when no user is authenticated', async () => {
     const res = await request(app)
-      .patch('/api/users/profile/image')
+      .patch('/api/v1/users/profile/image')
       .attach('picture', Buffer.from('data'), {
         filename: 'img.png',
         contentType: 'image/png',
@@ -141,14 +141,16 @@ describe('PATCH /api/users/profile/image', () => {
   });
 
   it('responds 400 when no file is attached', async () => {
-    const res = await request(app).patch('/api/users/profile/image').set(AUTH);
+    const res = await request(app)
+      .patch('/api/v1/users/profile/image')
+      .set(AUTH);
 
     expect(res.status).toBe(HttpStatusCode.BAD_REQUEST);
   });
 
   it('responds 400 when a non-image file is attached', async () => {
     const res = await request(app)
-      .patch('/api/users/profile/image')
+      .patch('/api/v1/users/profile/image')
       .set(AUTH)
       .attach('picture', Buffer.from('hello world'), {
         filename: 'document.txt',
@@ -162,7 +164,7 @@ describe('PATCH /api/users/profile/image', () => {
     const bigBuffer = Buffer.alloc(4 * 1024 * 1024, 'x');
 
     const res = await request(app)
-      .patch('/api/users/profile/image')
+      .patch('/api/v1/users/profile/image')
       .set(AUTH)
       .attach('picture', bigBuffer, {
         filename: 'big.png',
@@ -180,7 +182,7 @@ describe('PATCH /api/users/profile/image', () => {
     mockUploadAvatar.mockResolvedValue(fakeResult);
 
     const res = await request(app)
-      .patch('/api/users/profile/image')
+      .patch('/api/v1/users/profile/image')
       .set(AUTH)
       .attach('picture', Buffer.from('fake-image-bytes'), {
         filename: 'avatar.png',
@@ -199,7 +201,7 @@ describe('PATCH /api/users/profile/image', () => {
     mockUploadAvatar.mockRejectedValue(new Error('storage error'));
 
     const res = await request(app)
-      .patch('/api/users/profile/image')
+      .patch('/api/v1/users/profile/image')
       .set(AUTH)
       .attach('picture', Buffer.from('fake-image-bytes'), {
         filename: 'avatar.png',

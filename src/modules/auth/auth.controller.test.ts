@@ -23,27 +23,25 @@ import { errorHandler } from '@/middlewares/error.middleware.js';
 
 const app = express();
 app.use(express.json());
-app.use('/api/auth', userRouter);
+app.use('/api/v1/auth', userRouter);
 app.use(errorHandler);
 
 const AUTH = TestFactory.AUTH_HEADER;
 
 // ── POST createUserDocument ────────────────────────────────────────────────
 
-describe('POST /api/auth/createUserDocument', () => {
+describe('POST /api/v1/auth', () => {
   beforeEach(() => vi.clearAllMocks());
 
   it('responds 401 when no user is authenticated', async () => {
-    const res = await request(app).post('/api/auth/createUserDocument');
+    const res = await request(app).post('/api/v1/auth');
     expect(res.status).toBe(HttpStatusCode.UNAUTHORIZED);
   });
 
   it('responds 200 when the user profile already exists', async () => {
     mockInitializeUser.mockResolvedValue({ isNew: false });
 
-    const res = await request(app)
-      .post('/api/auth/createUserDocument')
-      .set(AUTH);
+    const res = await request(app).post('/api/v1/auth').set(AUTH);
 
     expect(mockInitializeUser).toHaveBeenCalledWith(
       expect.objectContaining({ uid: TestFactory.CONTROLLER_UID }),
@@ -57,9 +55,7 @@ describe('POST /api/auth/createUserDocument', () => {
 
   it('responds 201 when the user profile does not exist yet', async () => {
     mockInitializeUser.mockResolvedValue({ isNew: true });
-    const res = await request(app)
-      .post('/api/auth/createUserDocument')
-      .set(AUTH);
+    const res = await request(app).post('/api/v1/auth').set(AUTH);
 
     expect(res.status).toBe(HttpStatusCode.CREATED);
     expect(res.body).toEqual({
@@ -70,9 +66,7 @@ describe('POST /api/auth/createUserDocument', () => {
 
   it('responds 500 when the service throws', async () => {
     mockInitializeUser.mockRejectedValue(new Error('Firestore down'));
-    const res = await request(app)
-      .post('/api/auth/createUserDocument')
-      .set(AUTH);
+    const res = await request(app).post('/api/v1/auth').set(AUTH);
 
     expect(res.status).toBe(HttpStatusCode.INTERNAL_SERVER_ERROR);
   });
