@@ -11,38 +11,9 @@ import * as avatarSharedService from './avatar-shared.service.js';
 import * as userService from '@/modules/users/service/user.service.js';
 import config from '@/config/config.js';
 import type { PresetType } from '../types.js';
+import { STYLE_TEMPLATES } from '../avatars.utils.js';
 
-export const STYLE_TEMPLATES = {
-  none: ['- Sharp focus'].join('\n'),
-  anime: [
-    '- Anime illustration style',
-    '- Bold outlines',
-    '- Vibrant flat colors',
-    '- Expressive stylized features',
-  ].join('\n'),
-  simpsons: [
-    '- 1990s prime-time animated sitcom style',
-    '- Bright yellow skin tone',
-    '- Distinct round bulging eyes and a prominent overbite',
-    '- Clean linework with flat, bold colors',
-    '- 2D animation cel aesthetic',
-  ].join('\n'),
-  soviet: [
-    '- Vintage Soviet propaganda poster aesthetic',
-    '- Heroic and stoic expression',
-    '- Bold graphic style with sharp, geometric shapes and high contrast',
-    '- Limited color palette dominated by deep red, gold, and dark tones',
-    '- Subtle screen-printed texture on aged, weathered paper',
-  ].join('\n'),
-  oilPainting: [
-    '- Classical oil painting portrait in the style of the Old Masters',
-    '- Rich, deep colors with smooth brushwork and subtle impasto texture',
-    '- Dramatic chiaroscuro lighting with warm golden tones',
-    '- Fine craquelure and painterly canvas depth',
-  ].join('\n'),
-} as const;
-
-export type StyleTemplate = keyof typeof STYLE_TEMPLATES;
+type StyleTemplate = keyof typeof STYLE_TEMPLATES;
 
 export const generateImages = async (
   prompt: string,

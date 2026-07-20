@@ -19,22 +19,13 @@ const upload = multer({
 });
 
 const router = Router();
-
-router.get(
-  '/getUserProfile',
-  verifyAuthTokenHandler,
-  userController.getUserProfile,
-);
-
-router.patch(
-  '/updateProfile',
-  verifyAuthTokenHandler,
-  userController.updateProfile,
-);
+router.use(verifyAuthTokenHandler);
+router
+  .get('/profile', userController.getUserProfile)
+  .patch('/profile', userController.updateProfile);
 
 router.patch(
   '/profile/image',
-  verifyAuthTokenHandler,
   upload.single('picture'),
   userController.updateProfileImage,
 );

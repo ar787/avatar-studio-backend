@@ -13,7 +13,12 @@ export const getUserProfile = async (
   next: NextFunction,
 ) => {
   try {
-    const userId = req.user?.uid!;
+    const userId = req.user?.uid;
+
+    if (!userId) {
+      throw new UnauthorizedError('User ID not found in request');
+    }
+
     const result = await userService.getUserProfile(userId);
 
     res.status(HttpStatusCode.OK).json({
@@ -30,15 +35,15 @@ export const updateProfile = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const userId = req.user?.uid;
-
-  if (!userId) {
-    throw new UnauthorizedError('User ID not found in request');
-  }
-
-  const { displayName } = req.body as UserProfile;
-
   try {
+    const userId = req.user?.uid;
+
+    if (!userId) {
+      throw new UnauthorizedError('User ID not found in request');
+    }
+
+    const { displayName } = req.body as UserProfile;
+
     const result = await userService.renameUser(userId, displayName);
     res.status(HttpStatusCode.OK).json({
       success: true,
@@ -55,18 +60,18 @@ export const updateProfileImage = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const userId = req.user?.uid;
-  const file = req.file;
-
-  if (!userId) {
-    throw new UnauthorizedError('User ID not found in request');
-  }
-
-  if (!file) {
-    throw new BadRequestError('No file uploaded');
-  }
-
   try {
+    const userId = req.user?.uid;
+    const file = req.file;
+
+    if (!userId) {
+      throw new UnauthorizedError('User ID not found in request');
+    }
+
+    if (!file) {
+      throw new BadRequestError('No file uploaded');
+    }
+
     const { message, picture } = await userService.uploadAvatar(userId, file);
     res.status(HttpStatusCode.OK).json({ success: true, message, picture });
   } catch (error) {
